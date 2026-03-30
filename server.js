@@ -6,6 +6,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,116 @@ const anthropic = new Anthropic({
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'atletas_do_reino_2024_secret';
+
+// ─── Email ───────────────────────────────────────────────────────────────────
+const emailTransporter = process.env.GMAIL_USER && process.env.GMAIL_PASS
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS }
+    })
+  : null;
+
+async function enviarEmailTreino(atleta, semanaData, programacaoId) {
+  if (!emailTransporter || !atleta.email) return;
+  try {
+    const fase = semanaData.semana || semanaData;
+    const dias = fase.dias || [];
+    const siteUrl = process.env.SITE_URL || 'https://atletas-do-reino.up.railway.app';
+
+    const modalidadeCor = {
+      'LPO': '#D4A832', 'Força': '#60a5fa', 'Ginástica': '#f204da',
+      'Cardio': '#4ade80', 'Misto': '#fb923c', 'Skill': '#a78bfa', 'Descanso': '#4b5563'
+    };
+
+    const diasHtml = dias.map(d => {
+      if (d.tipo === 'descanso') {
+        return `<tr><td style="padding:8px 0;border-bottom:1px solid #1e3a5f;">
+          <span style="color:#4b5563;font-family:'Arial',sans-serif;font-size:13px;">
+            ${d.dia_semana} — 😴 ${d.titulo || 'Descanso'}
+          </span></td></tr>`;
+      }
+      const mods = (d.modalidade || []).map(m => {
+        const cor = modalidadeCor[m] || '#8a9bb5';
+        return `<span style="background:${cor}22;color:${cor};border:1px solid ${cor}44;border-radius:4px;font-size:10px;padding:1px 6px;margin-right:4px;font-family:Arial,sans-serif;">${m}</span>`;
+      }).join('');
+      const wod = d.wod ? `<div style="font-size:11px;color:#a8bcd4;margin-top:3px;font-family:Arial,sans-serif;">${d.wod.tag || ''} · ${d.wod.formato || ''}</div>` : '';
+      return `<tr><td style="padding:10px 0;border-bottom:1px solid #1e3a5f;">
+        <div style="color:#F0EDE6;font-weight:bold;font-size:14px;font-family:Arial,sans-serif;">${d.dia_semana} — ${d.titulo}</div>
+        <div style="margin-top:4px;">${mods}</div>
+        ${wod}
+      </td></tr>`;
+    }).join('');
+
+    const html = `
+<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#0D1F3C;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0D1F3C;min-height:100vh;">
+<tr><td align="center" style="padding:32px 16px;">
+  <table width="100%" style="max-width:520px;background:#142d54;border-radius:16px;overflow:hidden;border:1px solid #1e3a5f;">
+
+    <!-- Header -->
+    <tr><td style="background:linear-gradient(135deg,#0D1F3C,#142d54);padding:28px 28px 20px;text-align:center;border-bottom:2px solid #D4A832;">
+      <div style="font-size:11px;color:#D4A832;letter-spacing:3px;font-family:Arial,sans-serif;text-transform:uppercase;margin-bottom:6px;">ATLETAS DO REINO</div>
+      <h1 style="margin:0;color:#F0EDE6;font-size:22px;font-family:Georgia,serif;">Sua programação está pronta!</h1>
+      <div style="color:#a8bcd4;font-size:13px;font-family:Arial,sans-serif;margin-top:6px;">Semana ${fase.numero || ''} · Fase de ${fase.fase || 'Base'}</div>
+    </td></tr>
+
+    <!-- Saudação -->
+    <tr><td style="padding:20px 28px 4px;">
+      <p style="color:#F0EDE6;font-size:15px;font-family:Arial,sans-serif;margin:0;">
+        Olá, <strong>${atleta.nome || 'Atleta'}</strong>! 👋
+      </p>
+      <p style="color:#a8bcd4;font-size:13px;font-family:Arial,sans-serif;margin:8px 0 0;">
+        Sua nova semana de treinos foi gerada com base no seu perfil e histórico. Confira o resumo abaixo:
+      </p>
+    </td></tr>
+
+    <!-- Tema -->
+    <tr><td style="padding:12px 28px;">
+      <div style="background:#0D1F3C;border-radius:8px;padding:12px 16px;border-left:3px solid #D4A832;">
+        <div style="color:#D4A832;font-size:10px;letter-spacing:2px;font-family:Arial,sans-serif;text-transform:uppercase;">Tema da semana</div>
+        <div style="color:#F0EDE6;font-size:14px;font-family:Arial,sans-serif;margin-top:4px;">${fase.tema || ''}</div>
+      </div>
+    </td></tr>
+
+    <!-- Dias -->
+    <tr><td style="padding:8px 28px 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${diasHtml}
+      </table>
+    </td></tr>
+
+    <!-- CTA -->
+    <tr><td style="padding:0 28px 28px;text-align:center;">
+      <a href="${siteUrl}/programacao.html" style="display:inline-block;background:#D4A832;color:#0D1F3C;text-decoration:none;font-weight:bold;font-size:14px;font-family:Arial,sans-serif;padding:13px 32px;border-radius:10px;letter-spacing:1px;text-transform:uppercase;">
+        Ver Programação Completa →
+      </a>
+    </td></tr>
+
+    <!-- Footer -->
+    <tr><td style="background:#0D1F3C;padding:16px 28px;text-align:center;border-top:1px solid #1e3a5f;">
+      <p style="color:#4b6b8a;font-size:11px;font-family:Arial,sans-serif;margin:0;">
+        Atletas do Reino · Blumenau, SC<br>
+        <a href="${siteUrl}" style="color:#D4A832;text-decoration:none;">atletas-do-reino.up.railway.app</a>
+      </p>
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body></html>`;
+
+    await emailTransporter.sendMail({
+      from: `"Atletas do Reino" <${process.env.GMAIL_USER}>`,
+      to: atleta.email,
+      subject: `💪 Semana ${fase.numero || ''} pronta — ${fase.tema || 'Sua programação chegou!'}`,
+      html
+    });
+    console.log(`Email enviado para ${atleta.email}`);
+  } catch (err) {
+    console.error('Erro ao enviar email:', err.message);
+    // Não bloqueia a resposta se o email falhar
+  }
+}
 
 // ─── Middleware de autenticação (opcional) ───────────────────────────────────
 function authMiddleware(req, res, next) {
@@ -511,16 +622,25 @@ IMPORTANTE: Adapte todos os treinos ao local "${atleta.local_treino || 'box'}" e
 
     const responseText = message.content[0].text;
 
+    // Extrai JSON mesmo se a IA envolver com markdown ```json ... ```
     let jsonStr = responseText;
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) jsonStr = jsonMatch[0];
+    const mdMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (mdMatch) {
+      jsonStr = mdMatch[1].trim();
+    } else {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) jsonStr = jsonMatch[0];
+    }
 
     let semanaData;
     try {
       semanaData = JSON.parse(jsonStr);
     } catch (parseErr) {
-      console.error('Erro ao parsear JSON da IA:', parseErr);
-      return res.status(500).json({ erro: 'Erro ao processar a programação gerada. Tente novamente.' });
+      console.error('Erro ao parsear JSON da IA. Texto recebido:', responseText.substring(0, 500));
+      return res.status(500).json({
+        erro: 'A IA retornou um formato inesperado. Tente gerar novamente.',
+        detalhe: parseErr.message
+      });
     }
 
     const { data: prog, error: progError } = await supabase
@@ -530,6 +650,9 @@ IMPORTANTE: Adapte todos os treinos ao local "${atleta.local_treino || 'box'}" e
       .single();
 
     if (progError) throw progError;
+
+    // Enviar email em background (não bloqueia a resposta)
+    enviarEmailTreino(atleta, semanaData, prog.id);
 
     res.json({ programacao_id: prog.id, semana: semanaData });
   } catch (err) {
