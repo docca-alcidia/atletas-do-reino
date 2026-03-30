@@ -293,8 +293,14 @@
           detail = ex.detalhes || '';
         }
 
+        const ytQuery = encodeURIComponent('como fazer ' + ex.nome + ' treino funcional');
+        const ytUrl = `https://www.youtube.com/results?search_query=${ytQuery}`;
+
         return `<div class="exercicio">
-          <div class="nome">${ex.nome}</div>
+          <div class="nome">
+            <span>${ex.nome}</span>
+            <a href="${ytUrl}" target="_blank" rel="noopener" class="yt-btn" title="Ver vídeo no YouTube">▶</a>
+          </div>
           <div class="detalhes">${detail}</div>
         </div>`;
       }).join('');

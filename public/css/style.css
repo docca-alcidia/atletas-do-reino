@@ -821,6 +821,30 @@ input[type="range"]::-moz-range-thumb {
   color: var(--branco);
   font-size: 0.95rem;
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 5px;
+  color: #ff4444;
+  font-size: 0.6rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.yt-btn:hover {
+  background: rgba(255, 0, 0, 0.3);
+  border-color: rgba(255, 0, 0, 0.6);
 }
 
 .exercicio .detalhes {
