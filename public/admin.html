@@ -316,9 +316,18 @@
 
     // ══ ATLETAS ══
     async function carregarAtletas() {
-      const res = await fetch('/api/admin/atletas', { headers: { 'x-admin-key': adminKey } });
-      todosAtletas = await res.json();
-      filtrar();
+      try {
+        document.getElementById('atletasList').innerHTML = '<div class="empty-state">Carregando atletas...</div>';
+        const res = await fetch('/api/admin/atletas', { headers: { 'x-admin-key': adminKey } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || 'Erro ao carregar atletas.');
+        if (!Array.isArray(data)) throw new Error('Resposta inválida da API.');
+        todosAtletas = data;
+        filtrar();
+      } catch (e) {
+        console.error('Erro carregarAtletas:', e);
+        document.getElementById('atletasList').innerHTML = `<div class="empty-state" style="color:var(--laranja)">Erro: ${e.message}</div>`;
+      }
     }
 
     function setFiltro(btn, f) {

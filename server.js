@@ -790,17 +790,23 @@ app.get('/api/admin/atletas', adminAuth, async (req, res) => {
   try {
     const { data: atletas, error } = await supabase
       .from('atletas')
-      .select('id, nome, email, nivel, frequencia, criado_em, cidade, estado, objetivos, lesoes, tempo_treino, local_treino, prs, skills, movimentos_desenvolver, contexto')
-      .order('criado_em', { ascending: false });
+      .select('*')
+      .order('id', { ascending: false });
 
     if (error) throw error;
 
-    // Buscar programações e check-ins de todos os atletas
     const ids = (atletas || []).map(a => a.id);
-    const [{ data: progs }, { data: checkins }] = await Promise.all([
+
+    // Se não há atletas, retorna vazio
+    if (ids.length === 0) return res.json([]);
+
+    const [progsResult, checkinsResult] = await Promise.all([
       supabase.from('programacoes').select('atleta_id, semana_numero, gerado_em').in('atleta_id', ids),
       supabase.from('checkins').select('atleta_id, criado_em, sensacao, rpe, concluido').in('atleta_id', ids).order('criado_em', { ascending: false }),
     ]);
+
+    const progs = progsResult.data || [];
+    const checkins = checkinsResult.data || [];
 
     // Agrupar por atleta
     const progMap = {};
