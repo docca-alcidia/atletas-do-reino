@@ -6,22 +6,6 @@
   <title>Atletas do Reino — Meus PRs</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .prs-header {
-      padding: 28px 0 12px;
-      text-align: center;
-    }
-    .prs-header h2 {
-      font-size: 1.4rem;
-      color: var(--dourado);
-      margin-bottom: 4px;
-    }
-    .prs-header p {
-      font-size: 0.82rem;
-      color: var(--cinza-escuro);
-      font-family: 'Barlow Condensed', sans-serif;
-      letter-spacing: 0.04em;
-    }
-
     .back-btn {
       display: flex;
       align-items: center;
@@ -32,170 +16,24 @@
       font-size: 0.78rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      padding: 12px 0 0;
+      padding: 14px 0 0;
     }
     .back-btn:hover { color: var(--branco); }
 
-    .pr-section {
-      background: var(--azul-card);
-      border: 1px solid rgba(160,186,214,0.1);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-    .pr-section-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      color: var(--cinza-escuro);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(160,186,214,0.08);
-    }
-
-    .pr-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(160,186,214,0.06);
-    }
-    .pr-row:last-child { border-bottom: none; }
-
-    .pr-info { flex: 1; }
-    .pr-nome {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--branco);
-      margin-bottom: 1px;
-    }
-    .pr-atual {
-      font-size: 0.75rem;
-      color: var(--cinza-escuro);
-      font-family: 'Barlow Condensed', sans-serif;
-    }
-    .pr-atual span {
-      color: var(--dourado);
-      font-weight: 600;
-    }
-
-    .pr-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .pr-input {
-      width: 80px;
-      background: rgba(160,186,214,0.06);
-      border: 1px solid rgba(160,186,214,0.15);
-      border-radius: 8px;
-      color: var(--branco);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 6px 10px;
+    .prs-header {
+      padding: 16px 0 14px;
       text-align: center;
-      outline: none;
-      transition: border-color 0.2s;
     }
-    .pr-input:focus {
-      border-color: var(--dourado);
-    }
-    .pr-unit {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.75rem;
-      color: var(--cinza-escuro);
-      width: 28px;
-    }
-
-    .pr-novo-badge {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.65rem;
-      color: var(--verde);
-      background: rgba(74,222,128,0.1);
-      border: 1px solid rgba(74,222,128,0.25);
-      border-radius: 5px;
-      padding: 2px 6px;
-      letter-spacing: 0.05em;
-      display: none;
-    }
-
-    .btn-salvar {
-      width: 100%;
-      background: var(--dourado);
-      color: var(--azul);
-      border: none;
-      border-radius: 12px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 14px;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.2s;
-    }
-    .btn-salvar:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-salvar:hover:not(:disabled) { opacity: 0.9; }
-
-    /* Histórico */
-    .historico-section {
-      margin-top: 24px;
-    }
-    .historico-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      color: var(--cinza-escuro);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .historico-empty {
-      text-align: center;
-      color: var(--cinza-escuro);
-      font-size: 0.82rem;
-      padding: 20px 0;
-    }
-    .pr-hist-card {
-      background: var(--azul-card);
-      border: 1px solid rgba(160,186,214,0.08);
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .pr-hist-mov {
-      font-weight: 600;
-      font-size: 0.88rem;
-      color: var(--branco);
-    }
-    .pr-hist-data {
-      font-size: 0.72rem;
-      color: var(--cinza-escuro);
-      font-family: 'Barlow Condensed', sans-serif;
-      margin-top: 1px;
-    }
-    .pr-hist-valor {
-      text-align: right;
-    }
-    .pr-hist-novo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
+    .prs-header h2 {
+      font-size: 1.35rem;
       color: var(--dourado);
+      margin-bottom: 3px;
     }
-    .pr-hist-anterior {
-      font-size: 0.72rem;
+    .prs-header p {
+      font-size: 0.8rem;
       color: var(--cinza-escuro);
       font-family: 'Barlow Condensed', sans-serif;
-    }
-    .pr-hist-seta {
-      color: var(--verde);
-      font-size: 0.7rem;
+      letter-spacing: 0.04em;
     }
 
     .tab-row {
@@ -222,16 +60,184 @@
       border-color: rgba(212,168,50,0.35);
       color: var(--dourado);
     }
+
+    /* Seção */
+    .pr-section {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.1);
+      border-radius: 14px;
+      padding: 4px 14px 10px;
+      margin-bottom: 12px;
+    }
+    .pr-section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.68rem;
+      color: var(--cinza-escuro);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 0 8px;
+      border-bottom: 1px solid rgba(160,186,214,0.08);
+      margin-bottom: 4px;
+    }
+
+    /* Linha de PR */
+    .pr-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(160,186,214,0.05);
+      gap: 8px;
+    }
+    .pr-row:last-child { border-bottom: none; }
+
+    .pr-nome {
+      flex: 1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--branco);
+      min-width: 0;
+    }
+    .pr-atual {
+      font-size: 0.72rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      white-space: nowrap;
+    }
+    .pr-atual b { color: var(--dourado); font-weight: 700; }
+
+    .pr-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .pr-input {
+      width: 72px;
+      background: rgba(160,186,214,0.07);
+      border: 1px solid rgba(160,186,214,0.15);
+      border-radius: 8px;
+      color: var(--branco);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 5px 8px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .pr-input:focus { border-color: var(--dourado); }
+    .pr-input.improved { border-color: rgba(74,222,128,0.5); }
+    .pr-unit {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      color: var(--cinza-escuro);
+      min-width: 24px;
+    }
+    .pr-novo-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem;
+      color: var(--verde);
+      background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.25);
+      border-radius: 4px;
+      padding: 1px 5px;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .btn-salvar {
+      width: 100%;
+      background: var(--dourado);
+      color: var(--azul);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-salvar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Histórico */
+    .historico-empty {
+      text-align: center;
+      color: var(--cinza-escuro);
+      font-size: 0.82rem;
+      padding: 32px 0;
+    }
+    .hist-filtro {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hist-filtro-btn {
+      background: rgba(160,186,214,0.06);
+      border: 1px solid rgba(160,186,214,0.12);
+      border-radius: 8px;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+    .hist-filtro-btn.active {
+      background: rgba(212,168,50,0.1);
+      border-color: rgba(212,168,50,0.3);
+      color: var(--dourado);
+    }
+    .pr-hist-card {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pr-hist-mov {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--branco);
+    }
+    .pr-hist-data {
+      font-size: 0.72rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      margin-top: 1px;
+    }
+    .pr-hist-novo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--dourado);
+      text-align: right;
+    }
+    .pr-hist-anterior {
+      font-size: 0.7rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      text-align: right;
+    }
+    .pr-hist-seta { color: var(--verde); }
   </style>
 </head>
 <body>
   <div class="container" style="padding-bottom:40px;">
 
-    <a href="/programacao.html" class="back-btn">← Voltar para Programação</a>
+    <a href="/programacao.html" class="back-btn">← Voltar</a>
 
     <div class="prs-header">
       <h2>🏆 Meus Recordes</h2>
-      <p>Atualize seus PRs sempre que bater um novo recorde</p>
+      <p>Atualize sempre que bater um novo PR</p>
     </div>
 
     <div class="tab-row">
@@ -239,116 +245,45 @@
       <button class="tab-btn" id="tabHistorico" onclick="showTab('historico')">Histórico</button>
     </div>
 
-    <!-- Tab: Atualizar PRs -->
+    <!-- ═══ TAB ATUALIZAR ═══ -->
     <div id="panelAtualizar">
+
+      <!-- Levantamentos Olímpicos -->
       <div class="pr-section">
-        <div class="pr-section-title">⚡ Levantamentos Olímpicos & Força</div>
-
-        <div class="pr-row" data-mov="back_squat">
-          <div class="pr-info">
-            <div class="pr-nome">Back Squat</div>
-            <div class="pr-atual">Atual: <span id="val_back_squat">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_back_squat" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_back_squat">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="front_squat">
-          <div class="pr-info">
-            <div class="pr-nome">Front Squat</div>
-            <div class="pr-atual">Atual: <span id="val_front_squat">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_front_squat" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_front_squat">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="deadlift">
-          <div class="pr-info">
-            <div class="pr-nome">Deadlift</div>
-            <div class="pr-atual">Atual: <span id="val_deadlift">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_deadlift" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_deadlift">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="strict_press">
-          <div class="pr-info">
-            <div class="pr-nome">Strict Press</div>
-            <div class="pr-atual">Atual: <span id="val_strict_press">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_strict_press" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_strict_press">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="snatch">
-          <div class="pr-info">
-            <div class="pr-nome">Snatch</div>
-            <div class="pr-atual">Atual: <span id="val_snatch">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_snatch" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_snatch">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="clean_jerk">
-          <div class="pr-info">
-            <div class="pr-nome">Clean & Jerk</div>
-            <div class="pr-atual">Atual: <span id="val_clean_jerk">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_clean_jerk" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_clean_jerk">NOVO!</span>
-          </div>
-        </div>
-
-        <div class="pr-row" data-mov="bench_press">
-          <div class="pr-info">
-            <div class="pr-nome">Bench Press</div>
-            <div class="pr-atual">Atual: <span id="val_bench_press">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="number" class="pr-input" id="inp_bench_press" placeholder="0" min="0" step="0.5">
-            <span class="pr-unit">kg</span>
-            <span class="pr-novo-badge" id="badge_bench_press">NOVO!</span>
-          </div>
-        </div>
+        <div class="pr-section-title">⚡ Levantamentos Olímpicos</div>
+        <div id="rows_olimpicos"></div>
       </div>
 
+      <!-- Força -->
       <div class="pr-section">
-        <div class="pr-section-title">🚣 Cardio</div>
-        <div class="pr-row" data-mov="remo_500m">
-          <div class="pr-info">
-            <div class="pr-nome">500m Remo</div>
-            <div class="pr-atual">Atual: <span id="val_remo_500m">—</span></div>
-          </div>
-          <div class="pr-input-wrap">
-            <input type="text" class="pr-input" id="inp_remo_500m" placeholder="1:45" style="width:90px;">
-            <span class="pr-unit" style="width:36px;font-size:0.68rem;">min</span>
-            <span class="pr-novo-badge" id="badge_remo_500m">NOVO!</span>
-          </div>
-        </div>
+        <div class="pr-section-title">🦾 Força</div>
+        <div id="rows_forca"></div>
+      </div>
+
+      <!-- Ginástica -->
+      <div class="pr-section">
+        <div class="pr-section-title">🤸 Ginástica (máx. reps)</div>
+        <div id="rows_ginastica"></div>
+      </div>
+
+      <!-- Cardio -->
+      <div class="pr-section">
+        <div class="pr-section-title">🚣 Cardio (tempos)</div>
+        <div id="rows_cardio"></div>
+      </div>
+
+      <!-- Benchmarks -->
+      <div class="pr-section">
+        <div class="pr-section-title">🔥 Benchmarks (tempo / rounds)</div>
+        <div id="rows_benchmarks"></div>
       </div>
 
       <button class="btn-salvar" id="btnSalvar" onclick="salvarPRs()">Salvar PRs</button>
     </div>
 
-    <!-- Tab: Histórico -->
+    <!-- ═══ TAB HISTÓRICO ═══ -->
     <div id="panelHistorico" style="display:none;">
+      <div class="hist-filtro" id="histFiltro"></div>
       <div id="historicoContainer">
         <div class="historico-empty">Carregando...</div>
       </div>
@@ -356,90 +291,170 @@
 
   </div>
 
-  <script src="js/api.js"></script>
   <script>
     const atletaId = localStorage.getItem('atletaId') || localStorage.getItem('atleta_id');
     if (!atletaId) window.location.href = '/login.html';
 
-    const movimentos = ['back_squat','front_squat','deadlift','strict_press','snatch','clean_jerk','bench_press','remo_500m'];
-    let prsAtuais = {};
+    // ═══ DEFINIÇÃO COMPLETA DOS MOVIMENTOS ═══
+    const categorias = {
+      olimpicos: {
+        label: 'Levantamentos Olímpicos',
+        movimentos: [
+          { id: 'snatch',             nome: 'Snatch (Arranco)',         unidade: 'kg' },
+          { id: 'clean_jerk',         nome: 'Clean & Jerk',             unidade: 'kg' },
+          { id: 'clean',              nome: 'Clean',                    unidade: 'kg' },
+          { id: 'jerk',               nome: 'Jerk',                     unidade: 'kg' },
+          { id: 'power_snatch',       nome: 'Power Snatch',             unidade: 'kg' },
+          { id: 'power_clean',        nome: 'Power Clean',              unidade: 'kg' },
+          { id: 'hang_power_snatch',  nome: 'Hang Power Snatch',        unidade: 'kg' },
+          { id: 'hang_power_clean',   nome: 'Hang Power Clean',         unidade: 'kg' },
+          { id: 'hang_snatch',        nome: 'Hang Snatch',              unidade: 'kg' },
+          { id: 'hang_clean',         nome: 'Hang Clean',               unidade: 'kg' },
+          { id: 'snatch_pull',        nome: 'Snatch Pull',              unidade: 'kg' },
+          { id: 'clean_pull',         nome: 'Clean Pull',               unidade: 'kg' },
+        ]
+      },
+      forca: {
+        label: 'Força',
+        movimentos: [
+          { id: 'back_squat',         nome: 'Back Squat',               unidade: 'kg' },
+          { id: 'front_squat',        nome: 'Front Squat',              unidade: 'kg' },
+          { id: 'overhead_squat',     nome: 'Overhead Squat',           unidade: 'kg' },
+          { id: 'deadlift',           nome: 'Deadlift',                 unidade: 'kg' },
+          { id: 'sumo_deadlift',      nome: 'Sumo Deadlift',            unidade: 'kg' },
+          { id: 'strict_press',       nome: 'Strict Press',             unidade: 'kg' },
+          { id: 'push_press',         nome: 'Push Press',               unidade: 'kg' },
+          { id: 'push_jerk',          nome: 'Push Jerk',                unidade: 'kg' },
+          { id: 'split_jerk',         nome: 'Split Jerk',               unidade: 'kg' },
+          { id: 'bench_press',        nome: 'Bench Press',              unidade: 'kg' },
+          { id: 'thruster',           nome: 'Thruster',                 unidade: 'kg' },
+          { id: 'back_rack_lunge',    nome: 'Back Rack Lunge',          unidade: 'kg' },
+          { id: 'romanian_deadlift',  nome: 'Romanian Deadlift',        unidade: 'kg' },
+          { id: 'good_morning',       nome: 'Good Morning',             unidade: 'kg' },
+          { id: 'incline_bench',      nome: 'Incline Bench Press',      unidade: 'kg' },
+          { id: 'row_barra',          nome: 'Barbell Row',              unidade: 'kg' },
+        ]
+      },
+      ginastica: {
+        label: 'Ginástica',
+        movimentos: [
+          { id: 'pull_up_max',        nome: 'Pull-up (máx. reps)',       unidade: 'reps' },
+          { id: 'ctb_max',            nome: 'Chest-to-bar (máx. reps)', unidade: 'reps' },
+          { id: 'bar_mu_max',         nome: 'Bar Muscle-up (máx. reps)',unidade: 'reps' },
+          { id: 'ring_mu_max',        nome: 'Ring Muscle-up (máx. reps)',unidade: 'reps' },
+          { id: 'hspu_max',           nome: 'HSPU (máx. reps)',          unidade: 'reps' },
+          { id: 'strict_hspu_max',    nome: 'Strict HSPU (máx. reps)',   unidade: 'reps' },
+          { id: 'ttb_max',            nome: 'Toes to Bar (máx. reps)',   unidade: 'reps' },
+          { id: 'du_max',             nome: 'Double Unders (máx. 1 min)',unidade: 'reps' },
+          { id: 'pistol_max',         nome: 'Pistol Squat (máx. cada)', unidade: 'reps' },
+          { id: 'dip_max',            nome: 'Ring Dip (máx. reps)',      unidade: 'reps' },
+          { id: 'hs_walk',            nome: 'Handstand Walk (dist. max)',unidade: 'm' },
+          { id: 'l_sit',              nome: 'L-sit (tempo máx.)',        unidade: 'seg' },
+        ]
+      },
+      cardio: {
+        label: 'Cardio',
+        movimentos: [
+          { id: 'remo_500m',          nome: '500m Remo',                unidade: 'min' },
+          { id: 'remo_1000m',         nome: '1000m Remo',               unidade: 'min' },
+          { id: 'remo_2000m',         nome: '2000m Remo',               unidade: 'min' },
+          { id: 'run_400m',           nome: '400m Corrida',             unidade: 'min' },
+          { id: 'run_1mi',            nome: '1 Milha Corrida',          unidade: 'min' },
+          { id: 'run_5k',             nome: '5km Corrida',              unidade: 'min' },
+          { id: 'ski_500m',           nome: '500m Ski Erg',             unidade: 'min' },
+          { id: 'ski_1000m',          nome: '1000m Ski Erg',            unidade: 'min' },
+          { id: 'bike_cal',           nome: 'Assault Bike (máx. cal/min)',unidade: 'cal' },
+        ]
+      },
+      benchmarks: {
+        label: 'Benchmarks',
+        movimentos: [
+          { id: 'fran',               nome: 'Fran',                     unidade: 'min' },
+          { id: 'grace',              nome: 'Grace',                    unidade: 'min' },
+          { id: 'isabel',             nome: 'Isabel',                   unidade: 'min' },
+          { id: 'helen',              nome: 'Helen',                    unidade: 'min' },
+          { id: 'annie',              nome: 'Annie',                    unidade: 'min' },
+          { id: 'cindy',              nome: 'Cindy',                    unidade: 'rounds' },
+          { id: 'murph',              nome: 'Murph',                    unidade: 'min' },
+          { id: 'diane',              nome: 'Diane',                    unidade: 'min' },
+          { id: 'elizabeth',          nome: 'Elizabeth',                unidade: 'min' },
+          { id: 'jackie',             nome: 'Jackie',                   unidade: 'min' },
+        ]
+      }
+    };
 
+    // Todos os movimentos em lista plana para lookup
+    const todosMovimentos = Object.values(categorias).flatMap(c => c.movimentos);
+    const nomeMovimento = {};
+    todosMovimentos.forEach(m => { nomeMovimento[m.id] = m.nome; });
+
+    let prsAtuais = {};
+    let historicoCompleto = [];
+    let filtroAtivo = 'todos';
+
+    // ═══ RENDER LINHAS ═══
+    function renderLinhas() {
+      Object.entries(categorias).forEach(([catId, cat]) => {
+        const container = document.getElementById('rows_' + catId);
+        if (!container) return;
+        container.innerHTML = cat.movimentos.map(mov => {
+          const val = prsAtuais[mov.id];
+          const atualTxt = val ? `<b>${val}</b> ${mov.unidade}` : '—';
+          return `<div class="pr-row">
+            <div class="pr-nome">${mov.nome}</div>
+            <div class="pr-atual">${atualTxt}</div>
+            <div class="pr-input-wrap">
+              <input type="text" class="pr-input" id="inp_${mov.id}"
+                placeholder="${mov.unidade === 'kg' ? '0' : mov.unidade === 'reps' ? '0' : '0:00'}"
+                data-id="${mov.id}" data-unidade="${mov.unidade}">
+              <span class="pr-unit">${mov.unidade}</span>
+              <span class="pr-novo-badge" id="badge_${mov.id}">PR!</span>
+            </div>
+          </div>`;
+        }).join('');
+
+        // Listeners de input
+        container.querySelectorAll('.pr-input').forEach(inp => {
+          inp.addEventListener('input', function() {
+            const id = this.dataset.id;
+            const badge = document.getElementById('badge_' + id);
+            const novoStr = this.value.trim();
+            const novoNum = parseFloat(novoStr.replace(':', '.'));
+            const atualNum = parseFloat((prsAtuais[id] || '0').toString().replace(':', '.'));
+            const melhorou = novoStr !== '' && (atualNum === 0 || novoNum > atualNum || (this.dataset.unidade === 'min' && novoNum < atualNum && novoNum > 0));
+            if (badge) badge.style.display = melhorou ? 'inline-block' : 'none';
+            if (melhorou) this.classList.add('improved');
+            else this.classList.remove('improved');
+          });
+        });
+      });
+    }
+
+    // ═══ CARREGAR PRs DO SERVIDOR ═══
     async function carregarPRs() {
       try {
         const res = await fetch(`/api/atleta/${atletaId}/prs`);
         const data = await res.json();
         prsAtuais = data.prs || {};
-
-        movimentos.forEach(mov => {
-          const val = prsAtuais[mov];
-          const el = document.getElementById('val_' + mov);
-          if (el) el.textContent = val ? `${val}${mov === 'remo_500m' ? ' min' : ' kg'}` : '—';
-        });
-
-        renderHistorico(data.historico || []);
+        historicoCompleto = data.historico || [];
+        renderLinhas();
+        renderHistorico(historicoCompleto);
       } catch(e) {
         console.error('Erro ao carregar PRs:', e);
       }
     }
 
-    function renderHistorico(historico) {
-      const container = document.getElementById('historicoContainer');
-      if (!historico.length) {
-        container.innerHTML = '<div class="historico-empty">Nenhum PR registrado ainda.<br>Atualize seus recordes acima!</div>';
-        return;
-      }
-
-      const nomes = {
-        back_squat: 'Back Squat', front_squat: 'Front Squat', deadlift: 'Deadlift',
-        strict_press: 'Strict Press', snatch: 'Snatch', clean_jerk: 'Clean & Jerk',
-        bench_press: 'Bench Press', remo_500m: '500m Remo'
-      };
-
-      container.innerHTML = historico.map(h => {
-        const unidade = h.movimento === 'remo_500m' ? 'min' : 'kg';
-        const dataFormatada = new Date(h.registrado_em).toLocaleDateString('pt-BR', {
-          day: '2-digit', month: 'short', year: 'numeric'
-        });
-        const melhora = h.valor_anterior ? ((h.valor - h.valor_anterior)).toFixed(1) : null;
-
-        return `<div class="pr-hist-card">
-          <div>
-            <div class="pr-hist-mov">${nomes[h.movimento] || h.movimento}</div>
-            <div class="pr-hist-data">${dataFormatada}</div>
-          </div>
-          <div class="pr-hist-valor">
-            <div class="pr-hist-novo">${h.valor} ${unidade}</div>
-            ${h.valor_anterior
-              ? `<div class="pr-hist-anterior">antes: ${h.valor_anterior} ${unidade} <span class="pr-hist-seta">▲ +${melhora}${unidade}</span></div>`
-              : '<div class="pr-hist-anterior">primeiro registro</div>'
-            }
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // Detecta se o valor mudou e mostra badge NOVO
-    movimentos.forEach(mov => {
-      const inp = document.getElementById('inp_' + mov);
-      if (!inp) return;
-      inp.addEventListener('input', function() {
-        const badge = document.getElementById('badge_' + mov);
-        const novo = parseFloat(this.value);
-        const atual = parseFloat(prsAtuais[mov] || 0);
-        if (badge) badge.style.display = (novo > atual && novo > 0) ? 'inline-block' : 'none';
-      });
-    });
-
+    // ═══ SALVAR PRs ═══
     async function salvarPRs() {
       const btn = document.getElementById('btnSalvar');
       btn.disabled = true;
       btn.textContent = 'Salvando...';
 
       const novosPrs = { ...prsAtuais };
-      movimentos.forEach(mov => {
-        const inp = document.getElementById('inp_' + mov);
+      todosMovimentos.forEach(mov => {
+        const inp = document.getElementById('inp_' + mov.id);
         if (inp && inp.value.trim() !== '') {
-          novosPrs[mov] = inp.value.trim();
+          novosPrs[mov.id] = inp.value.trim();
         }
       });
 
@@ -452,30 +467,83 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.erro);
 
-        // Limpar inputs e recarregar
-        movimentos.forEach(mov => {
-          const inp = document.getElementById('inp_' + mov);
-          if (inp) inp.value = '';
-          const badge = document.getElementById('badge_' + mov);
+        // Limpar inputs
+        todosMovimentos.forEach(mov => {
+          const inp = document.getElementById('inp_' + mov.id);
+          if (inp) { inp.value = ''; inp.classList.remove('improved'); }
+          const badge = document.getElementById('badge_' + mov.id);
           if (badge) badge.style.display = 'none';
         });
 
         await carregarPRs();
 
         btn.textContent = data.atualizados > 0
-          ? `✓ ${data.atualizados} PR(s) atualizado(s)!`
-          : '✓ Salvo sem alterações';
-
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = 'Salvar PRs';
-        }, 2500);
-
+          ? `✓ ${data.atualizados} PR(s) batido(s)! 🎉`
+          : '✓ Salvo!';
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Salvar PRs'; }, 2500);
       } catch(e) {
         btn.disabled = false;
         btn.textContent = 'Salvar PRs';
-        alert(e.message || 'Erro ao salvar. Tente novamente.');
+        alert(e.message || 'Erro ao salvar.');
       }
+    }
+
+    // ═══ HISTÓRICO ═══
+    function renderHistorico(historico) {
+      const container = document.getElementById('historicoContainer');
+
+      // Filtros por categoria
+      const filtroEl = document.getElementById('histFiltro');
+      const cats = [{ id: 'todos', label: 'Todos' }, ...Object.entries(categorias).map(([id, c]) => ({ id, label: c.label }))];
+      filtroEl.innerHTML = cats.map(c =>
+        `<button class="hist-filtro-btn ${filtroAtivo === c.id ? 'active' : ''}"
+          onclick="filtrarHistorico('${c.id}')">${c.label}</button>`
+      ).join('');
+
+      // Filtrar
+      let filtrado = historico;
+      if (filtroAtivo !== 'todos') {
+        const ids = categorias[filtroAtivo]?.movimentos.map(m => m.id) || [];
+        filtrado = historico.filter(h => ids.includes(h.movimento));
+      }
+
+      if (!filtrado.length) {
+        container.innerHTML = '<div class="historico-empty">Nenhum registro ainda.<br>Atualize seus PRs para começar o histórico!</div>';
+        return;
+      }
+
+      container.innerHTML = filtrado.map(h => {
+        const unidade = todosMovimentos.find(m => m.id === h.movimento)?.unidade || '';
+        const dataFormatada = new Date(h.registrado_em).toLocaleDateString('pt-BR', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+        const isTempo = unidade === 'min';
+        let melhora = '';
+        if (h.valor_anterior) {
+          const diff = isTempo
+            ? (parseFloat(h.valor_anterior) - parseFloat(h.valor)).toFixed(2)
+            : (parseFloat(h.valor) - parseFloat(h.valor_anterior)).toFixed(1);
+          const sinal = parseFloat(diff) > 0 ? `▲ ${diff > 0 ? '-' : '+'}${Math.abs(diff)}${unidade}` : '';
+          melhora = sinal ? `<span class="pr-hist-seta">${sinal}</span>` : '';
+        }
+        return `<div class="pr-hist-card">
+          <div>
+            <div class="pr-hist-mov">${nomeMovimento[h.movimento] || h.movimento}</div>
+            <div class="pr-hist-data">${dataFormatada}</div>
+          </div>
+          <div>
+            <div class="pr-hist-novo">${h.valor} ${unidade}</div>
+            <div class="pr-hist-anterior">
+              ${h.valor_anterior ? `antes: ${h.valor_anterior} ${unidade} ${melhora}` : 'primeiro registro'}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function filtrarHistorico(catId) {
+      filtroAtivo = catId;
+      renderHistorico(historicoCompleto);
     }
 
     function showTab(tab) {
