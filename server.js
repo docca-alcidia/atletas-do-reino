@@ -272,9 +272,12 @@ app.post('/api/atleta/cadastrar', async (req, res) => {
   try {
     const dados = req.body;
 
+    // Sanitizar campos de data — string vazia vira null
+    const toDate = v => (v && v.toString().trim() !== '' ? v : null);
+
     const perfilData = {
       nome: dados.nome,
-      data_nascimento: dados.data_nascimento,
+      data_nascimento: toDate(dados.data_nascimento),
       categoria: dados.categoria,
       tempo_treino: dados.tempo_treino,
       nivel: dados.nivel,
@@ -289,7 +292,7 @@ app.post('/api/atleta/cadastrar', async (req, res) => {
       contexto: dados.contexto,
       tem_competicao: dados.tem_competicao,
       competicao_nome: dados.competicao_nome,
-      competicao_data: dados.competicao_data,
+      competicao_data: toDate(dados.competicao_data),
       competicao_categoria: dados.competicao_categoria,
       perfil_completo: true
     };
