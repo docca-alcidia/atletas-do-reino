@@ -614,7 +614,7 @@ Gere a semana ${semanaNumero} da fase de ${fase}.
 IMPORTANTE: Adapte todos os treinos ao local "${atleta.local_treino || 'box'}" e ao tempo disponível "${atleta.tempo_treino_disponivel || '1h'}".`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 8000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: perfilTexto }]
