@@ -372,7 +372,11 @@
               <div class="nome">${a.nome || '—'}</div>
               <div class="email">${a.email || ''}</div>
             </div>
-            <span class="status-badge ${statusCls}">${statusTxt}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="status-badge ${statusCls}">${statusTxt}</span>
+              <button onclick="event.stopPropagation();excluirAtleta('${a.id}','${(a.nome||'').replace(/'/g,"\\'")}')"
+                style="background:rgba(255,99,71,0.1);border:1px solid rgba(255,99,71,0.25);border-radius:7px;color:#ff6347;font-size:0.75rem;padding:4px 8px;cursor:pointer;" title="Excluir atleta">🗑️</button>
+            </div>
           </div>
           <div class="atleta-meta">
             <div class="meta-item"><span class="nivel-pill ${nivelCls}">${nivelLabel[a.nivel] || a.nivel || '—'}</span></div>
@@ -399,6 +403,25 @@
 
     function fecharModal() {
       document.getElementById('detalheModal').classList.remove('show');
+    }
+
+    // ══ EXCLUIR ATLETA ══
+    async function excluirAtleta(id, nome) {
+      if (!confirm(`Excluir "${nome}" permanentemente?\n\nIsso apaga o perfil, treinos, check-ins e PRs. Esta ação não pode ser desfeita.`)) return;
+      try {
+        const res = await fetch(`/api/admin/atleta/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro);
+        todosAtletas = todosAtletas.filter(a => a.id !== id);
+        fecharModal();
+        filtrar();
+        await carregarStats();
+      } catch (e) {
+        alert('Erro ao excluir: ' + e.message);
+      }
     }
 
     function renderDetalhe({ atleta: a, checkins, programacoes, pr_historico }) {
@@ -449,8 +472,16 @@
       }).join('') || '<div class="empty-state">Sem check-ins ainda.</div>';
 
       document.getElementById('detalheContent').innerHTML = `
-        <div class="modal-nome">${a.nome||'—'}</div>
-        <div class="modal-email">${a.email||''} · cadastrado há ${dias_cadastro} dias</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="modal-nome">${a.nome||'—'}</div>
+            <div class="modal-email">${a.email||''} · cadastrado há ${dias_cadastro} dias</div>
+          </div>
+          <button onclick="excluirAtleta('${a.id}','${(a.nome||'').replace(/'/g,"\\'")}')"
+            style="background:rgba(255,99,71,0.1);border:1px solid rgba(255,99,71,0.25);border-radius:8px;color:#ff6347;font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;padding:6px 12px;cursor:pointer;flex-shrink:0;">
+            🗑️ Excluir
+          </button>
+        </div>
 
         <div class="detail-section">
           <div class="detail-section-title">Perfil</div>

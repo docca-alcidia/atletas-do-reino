@@ -877,6 +877,26 @@ app.get('/api/admin/atleta/:id', adminAuth, async (req, res) => {
   }
 });
 
+// DELETE /api/admin/atleta/:id — exclui atleta e todos os dados relacionados
+app.delete('/api/admin/atleta/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Apagar em ordem para respeitar foreign keys
+    await supabase.from('pr_historico').delete().eq('atleta_id', id);
+    await supabase.from('checkins').delete().eq('atleta_id', id);
+    await supabase.from('resultados').delete().eq('atleta_id', id);
+    await supabase.from('programacoes').delete().eq('atleta_id', id);
+    const { error } = await supabase.from('atletas').delete().eq('id', id);
+
+    if (error) throw error;
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error('Erro ao excluir atleta:', err);
+    res.status(500).json({ erro: err.message || 'Erro ao excluir atleta.' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Atletas do Reino rodando na porta ${PORT}`);
