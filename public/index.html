@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atletas do Reino — Onboarding</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Atletas do Reino</h1>
+      <div class="slogan">Do Reino para a Glória</div>
+    </div>
+
+    <div class="progress-bar" id="progressBar">
+      <div class="step" data-step="1"></div>
+      <div class="step" data-step="2"></div>
+      <div class="step" data-step="3"></div>
+      <div class="step" data-step="4"></div>
+      <div class="step" data-step="5"></div>
+      <div class="step" data-step="6"></div>
+      <div class="step" data-step="7"></div>
+      <div class="step" data-step="8"></div>
+    </div>
+
+    <!-- STEP 1: Identificação -->
+    <div class="step-content active" id="step1">
+      <h2 class="step-title">Identificação</h2>
+      <p class="step-desc">Vamos começar com o básico sobre você.</p>
+
+      <div class="field">
+        <label>Nome do Atleta</label>
+        <input type="text" id="nome" placeholder="Seu nome completo">
+      </div>
+
+      <div class="field">
+        <label>Data de Nascimento</label>
+        <input type="date" id="dataNascimento">
+        <div id="categoriaAuto" style="margin-top:6px;font-size:0.85rem;color:var(--dourado);display:none;"></div>
+      </div>
+
+      <div class="field">
+        <label>Tempo de Treino Funcional</label>
+        <div class="options full" id="tempoTreino">
+          <div class="op" data-val="menos6m">Menos de 6 meses</div>
+          <div class="op" data-val="6m1a">6 meses a 1 ano</div>
+          <div class="op" data-val="1a2a">1 a 2 anos</div>
+          <div class="op" data-val="2a4a">2 a 4 anos</div>
+          <div class="op" data-val="4a6a">4 a 6 anos</div>
+          <div class="op" data-val="mais6a">Mais de 6 anos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Nível e Categoria -->
+    <div class="step-content" id="step2">
+      <h2 class="step-title">Nível e Categoria</h2>
+      <p class="step-desc">Seu nível é sobre os movimentos que executa, não o tempo de treino.</p>
+
+      <div class="field">
+        <label>Nível de Movimento</label>
+        <div class="options full" id="nivel">
+          <div class="op" data-val="iniciante">Iniciante — movimentos básicos, sem olímpicos ainda</div>
+          <div class="op" data-val="intermediario">Intermediário — tem os básicos, alguns LPO</div>
+          <div class="op" data-val="avancado">Avançado — maioria dos movimentos, cargas altas</div>
+          <div class="op" data-val="rx">RX Completo — todos os movimentos e cargas</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Categoria de Competição</label>
+        <div class="options half" id="categoriaComp">
+          <div class="op" data-val="teens">Teens</div>
+          <div class="op" data-val="adulto">Adulto</div>
+          <div class="op" data-val="m35">Master 35+</div>
+          <div class="op" data-val="m45">Master 45+</div>
+          <div class="op" data-val="m55">Master 55+</div>
+          <div class="op" data-val="m60">Master 60+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Objetivo e Rotina -->
+    <div class="step-content" id="step3">
+      <h2 class="step-title">Objetivo e Rotina</h2>
+      <p class="step-desc">Selecione um ou mais objetivos.</p>
+
+      <div class="field">
+        <label>Objetivos</label>
+        <div class="options full" id="objetivos">
+          <div class="mp" data-val="saude">Saúde e longevidade</div>
+          <div class="mp" data-val="forca">Ganhar força</div>
+          <div class="mp" data-val="condicionamento">Condicionamento geral</div>
+          <div class="mp" data-val="composicao">Composição corporal</div>
+          <div class="mp" data-val="competir">Competir em provas</div>
+          <div class="mp" data-val="ginastica">Evoluir na ginástica</div>
+          <div class="mp" data-val="lpo">Evoluir no LPO</div>
+          <div class="mp" data-val="cardio">Melhorar o cardio</div>
+        </div>
+        <div class="sel-count" id="objCount"></div>
+      </div>
+
+      <div class="field">
+        <label>Frequência Semanal</label>
+        <div class="options half" id="frequencia">
+          <div class="op" data-val="3x">3x por semana</div>
+          <div class="op" data-val="4x">4x por semana</div>
+          <div class="op" data-val="5x">5x por semana</div>
+          <div class="op" data-val="6x">6x por semana</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 10 Habilidades Físicas -->
+    <div class="step-content" id="step4">
+      <h2 class="step-title">10 Habilidades Físicas</h2>
+      <p class="step-desc">Avalie cada habilidade de 1 (muito fraco) a 5 (muito forte).</p>
+
+      <div id="skillsContainer">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- STEP 5: Movimentos para Desenvolver -->
+    <div class="step-content" id="step5">
+      <h2 class="step-title">Movimentos para Desenvolver</h2>
+      <p class="step-desc">Selecione os movimentos que quer evoluir.</p>
+
+      <div class="cat-group">
+        <h4>Levantamento Olímpico</h4>
+        <div class="options half" id="movLPO">
+          <div class="mp" data-val="Snatch">Snatch</div>
+          <div class="mp" data-val="Clean & Jerk">Clean & Jerk</div>
+          <div class="mp" data-val="Power Clean">Power Clean</div>
+          <div class="mp" data-val="Power Snatch">Power Snatch</div>
+          <div class="mp" data-val="Hang Clean">Hang Clean</div>
+          <div class="mp" data-val="Squat Clean">Squat Clean</div>
+        </div>
+      </div>
+
+      <div class="cat-group">
+        <h4>Ginástica</h4>
+        <div class="options half" id="movGin">
+          <div class="mp" data-val="Pull-up">Pull-up</div>
+          <div class="mp" data-val="Muscle-up">Muscle-up</div>
+          <div class="mp" data-val="HSPU">HSPU</div>
+          <div class="mp" data-val="Handstand Walk">Handstand Walk</div>
+          <div class="mp" data-val="Toes-to-Bar">Toes-to-Bar</div>
+          <div class="mp" data-val="Kipping Pull-up">Kipping Pull-up</div>
+        </div>
+      </div>
+
+      <div class="cat-group">
+        <h4>Anéis</h4>
+        <div class="options half" id="movAneis">
+          <div class="mp" data-val="Ring Muscle-up">Ring Muscle-up</div>
+          <div class="mp" data-val="Ring Dip">Ring Dip</div>
+          <div class="mp" data-val="Ring Row">Ring Row</div>
+          <div class="mp" data-val="L-sit">L-sit</div>
+          <div class="mp" data-val="Skin the Cat">Skin the Cat</div>
+        </div>
+      </div>
+
+      <div class="cat-group">
+        <h4>Pliometria / Skills</h4>
+        <div class="options half" id="movPlio">
+          <div class="mp" data-val="Box Jump">Box Jump</div>
+          <div class="mp" data-val="Double Under">Double Under</div>
+          <div class="mp" data-val="Pistol Squat">Pistol Squat</div>
+          <div class="mp" data-val="Bar Muscle-up">Bar Muscle-up</div>
+          <div class="mp" data-val="Broad Jump">Broad Jump</div>
+        </div>
+      </div>
+
+      <div class="cat-group">
+        <h4>Cardio / Locomoção</h4>
+        <div class="options half" id="movCardio">
+          <div class="mp" data-val="Rope Climb">Rope Climb</div>
+          <div class="mp" data-val="Wall Walk">Wall Walk</div>
+          <div class="mp" data-val="Rowing técnica">Rowing técnica</div>
+          <div class="mp" data-val="Ski Erg">Ski Erg</div>
+          <div class="mp" data-val="Assault Bike">Assault Bike</div>
+        </div>
+      </div>
+
+      <div class="sel-count" id="movCount"></div>
+    </div>
+
+    <!-- STEP 6: Últimas Semanas -->
+    <div class="step-content" id="step6">
+      <h2 class="step-title">Últimas Semanas</h2>
+      <p class="step-desc">Como foi seu treino recentemente?</p>
+
+      <div class="field">
+        <label>Como foram as últimas 2 semanas?</label>
+        <div class="options full" id="ultimaSemana">
+          <div class="op" data-val="otimo">Excelente — treinos completos, me senti forte</div>
+          <div class="op" data-val="bom">Bom — treinei bem, pequenas variações</div>
+          <div class="op" data-val="irregular">Irregular — perdi dias, intensidade variada</div>
+          <div class="op" data-val="ruim">Difícil — pouco treino, cansaço ou lesão</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Volume Relativo</label>
+        <div class="options half" id="volume">
+          <div class="op" data-val="abaixo">Abaixo do normal</div>
+          <div class="op" data-val="normal">Normal</div>
+          <div class="op" data-val="acima">Acima do normal</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Algo específico para nos contar?</label>
+        <textarea id="contexto" placeholder="Conte sobre lesões recentes, viagens, mudanças de rotina..."></textarea>
+      </div>
+    </div>
+
+    <!-- STEP 7: Limitações e Competições -->
+    <div class="step-content" id="step7">
+      <h2 class="step-title">Limitações e Competições</h2>
+      <p class="step-desc">Informações importantes para sua programação.</p>
+
+      <div class="field">
+        <label>Limitações Físicas</label>
+        <div class="options half" id="lesoes">
+          <div class="mp" data-val="Joelho">Joelho</div>
+          <div class="mp" data-val="Ombro">Ombro</div>
+          <div class="mp" data-val="Lombar">Lombar</div>
+          <div class="mp" data-val="Quadril">Quadril</div>
+          <div class="mp" data-val="Pulso">Pulso</div>
+          <div class="mp" data-val="Sem limitações">Sem limitações</div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <span>Vai competir em breve?</span>
+        <label class="toggle">
+          <input type="checkbox" id="temCompToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="comp-fields" id="compFields">
+        <div class="field">
+          <label>Nome do Evento</label>
+          <input type="text" id="compNome" placeholder="Ex: Throwdown Regional">
+        </div>
+        <div class="field">
+          <label>Data do Evento</label>
+          <input type="date" id="compData">
+        </div>
+        <div class="field">
+          <label>Categoria no Evento</label>
+          <div class="options half" id="compCat">
+            <div class="op" data-val="iniciante">Iniciante</div>
+            <div class="op" data-val="intermediario">Intermediário</div>
+            <div class="op" data-val="rx">RX</div>
+            <div class="op" data-val="elite">Elite</div>
+          </div>
+        </div>
+        <div class="period-preview" id="periodPreview">
+          <h4>Periodização Calculada</h4>
+          <div class="period-bar" id="periodBar"></div>
+          <div class="period-legend">
+            <span class="l-base">Base</span>
+            <span class="l-forca">Força</span>
+            <span class="l-precomp">Pré-comp</span>
+            <span class="l-taper">Tapering</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 8: Resumo -->
+    <div class="step-content" id="step8">
+      <h2 class="step-title">Seu Perfil</h2>
+      <p class="step-desc">Confira tudo antes de gerar sua programação.</p>
+
+      <div id="summaryContent">
+        <!-- Generated by JS -->
+      </div>
+
+      <button class="btn btn-generate" id="btnGerar">Gerar Minha Programação</button>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="btn-row" id="navBtns">
+      <button class="btn btn-secondary" id="btnPrev" style="display:none">Voltar</button>
+      <button class="btn btn-primary" id="btnNext">Continuar</button>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="msg" id="loadingMsg">Analisando seu perfil...</div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/onboarding.js"></script>
+</body>
+</html>
