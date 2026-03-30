@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
@@ -19,6 +21,20 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || ''
 });
 
+const JWT_SECRET = process.env.JWT_SECRET || 'atletas_do_reino_2024_secret';
+
+// ─── Middleware de autenticação (opcional) ───────────────────────────────────
+function authMiddleware(req, res, next) {
+  const token = req.headers['authorization']?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ erro: 'Token não fornecido.' });
+  try {
+    req.usuario = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+  }
+}
+
 const SYSTEM_PROMPT = `Você é um programador de treinos funcional especialista da plataforma Atletas do Reino.
 Gere uma semana de treinos personalizada baseada no perfil do atleta fornecido.
 
@@ -28,7 +44,8 @@ REGRAS FUNDAMENTAIS:
 3. A programação deve ser GERAL mas com ênfase nas deficiências identificadas
 4. Cada deficiência do perfil deve aparecer em pelo menos 1 treino da semana
 5. Respeite a frequência semanal informada pelo atleta
-6. Adapte volume e intensidade com base em como foram as últimas semanas
+6. Adapte volume e intensidade com base nos check-ins recentes e nas últimas semanas
+7. Se o atleta reportou movimentos difíceis nos check-ins, inclua progressão desses movimentos
 
 ESTRUTURA DE CADA DIA DE TREINO:
 - Modalidade do dia: LPO / Ginástica / Força / Cardio / Misto / Skill / Descanso
@@ -140,73 +157,202 @@ FORMATO DE RESPOSTA — retorne SOMENTE um JSON válido com esta estrutura:
 IMPORTANTE: Gere EXATAMENTE 7 dias (Segunda a Domingo). Os dias de descanso devem respeitar a frequência do atleta.
 Retorne SOMENTE o JSON, sem texto antes ou depois.`;
 
+// ═══════════════════════════════════════════════════════════════════
+// AUTH ROUTES
+// ═══════════════════════════════════════════════════════════════════
+
+// POST /api/auth/registrar
+app.post('/api/auth/registrar', async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+    if (!email || !senha) return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
+
+    // Verificar se email já existe
+    const { data: existe } = await supabase
+      .from('atletas')
+      .select('id, perfil_completo')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (existe) {
+      return res.status(409).json({ erro: 'Este email já está cadastrado. Faça login.' });
+    }
+
+    const senha_hash = await bcrypt.hash(senha, 10);
+
+    const { data, error } = await supabase
+      .from('atletas')
+      .insert({
+        email: email.toLowerCase(),
+        senha_hash,
+        perfil_completo: false,
+        nome: email.split('@')[0]
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const token = jwt.sign({ atleta_id: data.id, email: data.email }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({
+      token,
+      atleta_id: data.id,
+      perfil_completo: false,
+      mensagem: 'Conta criada! Complete seu perfil.'
+    });
+  } catch (err) {
+    console.error('Erro ao registrar:', err);
+    res.status(500).json({ erro: 'Erro ao criar conta. Tente novamente.' });
+  }
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+    if (!email || !senha) return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
+
+    const { data: atleta, error } = await supabase
+      .from('atletas')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (error || !atleta) {
+      return res.status(401).json({ erro: 'Email ou senha incorretos.' });
+    }
+
+    if (!atleta.senha_hash) {
+      return res.status(401).json({ erro: 'Conta sem senha. Use o onboarding para definir sua senha.' });
+    }
+
+    const senhaOk = await bcrypt.compare(senha, atleta.senha_hash);
+    if (!senhaOk) {
+      return res.status(401).json({ erro: 'Email ou senha incorretos.' });
+    }
+
+    const token = jwt.sign({ atleta_id: atleta.id, email: atleta.email }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({
+      token,
+      atleta_id: atleta.id,
+      nome: atleta.nome,
+      perfil_completo: atleta.perfil_completo || false,
+      mensagem: 'Login realizado com sucesso!'
+    });
+  } catch (err) {
+    console.error('Erro ao fazer login:', err);
+    res.status(500).json({ erro: 'Erro ao fazer login. Tente novamente.' });
+  }
+});
+
+// GET /api/auth/perfil
+app.get('/api/auth/perfil', authMiddleware, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('atletas')
+      .select('id, nome, email, categoria, nivel, frequencia, perfil_completo, criado_em')
+      .eq('id', req.usuario.atleta_id)
+      .single();
+
+    if (error || !data) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar perfil.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ATLETA ROUTES
+// ═══════════════════════════════════════════════════════════════════
+
 // POST /api/atleta/cadastrar
 app.post('/api/atleta/cadastrar', async (req, res) => {
   try {
     const dados = req.body;
-    const { data, error } = await supabase
-      .from('atletas')
-      .upsert({
-        nome: dados.nome,
-        data_nascimento: dados.data_nascimento,
-        categoria: dados.categoria,
-        tempo_treino: dados.tempo_treino,
-        nivel: dados.nivel,
-        categoria_competicao: dados.categoria_competicao,
-        objetivos: dados.objetivos,
-        frequencia: dados.frequencia,
-        skills: dados.skills,
-        movimentos_desenvolver: dados.movimentos_desenvolver,
-        lesoes: dados.lesoes,
-        ultima_semana: dados.ultima_semana,
-        volume: dados.volume,
-        contexto: dados.contexto,
-        tem_competicao: dados.tem_competicao,
-        competicao_nome: dados.competicao_nome,
-        competicao_data: dados.competicao_data,
-        competicao_categoria: dados.competicao_categoria,
-        email: dados.email || null
-      }, { onConflict: 'email', ignoreDuplicates: false })
-      .select()
-      .single();
 
-    if (error) {
-      // If upsert fails (e.g., no email), try insert
-      const { data: inserted, error: insertError } = await supabase
+    const perfilData = {
+      nome: dados.nome,
+      data_nascimento: dados.data_nascimento,
+      categoria: dados.categoria,
+      tempo_treino: dados.tempo_treino,
+      nivel: dados.nivel,
+      categoria_competicao: dados.categoria_competicao,
+      objetivos: dados.objetivos,
+      frequencia: dados.frequencia,
+      skills: dados.skills,
+      movimentos_desenvolver: dados.movimentos_desenvolver,
+      lesoes: dados.lesoes,
+      ultima_semana: dados.ultima_semana,
+      volume: dados.volume,
+      contexto: dados.contexto,
+      tem_competicao: dados.tem_competicao,
+      competicao_nome: dados.competicao_nome,
+      competicao_data: dados.competicao_data,
+      competicao_categoria: dados.competicao_categoria,
+      perfil_completo: true
+    };
+
+    // Se tem atleta_id, atualiza o registro existente (fluxo pós-login)
+    if (dados.atleta_id) {
+      const { data, error } = await supabase
         .from('atletas')
-        .insert({
-          nome: dados.nome,
-          data_nascimento: dados.data_nascimento,
-          categoria: dados.categoria,
-          tempo_treino: dados.tempo_treino,
-          nivel: dados.nivel,
-          categoria_competicao: dados.categoria_competicao,
-          objetivos: dados.objetivos,
-          frequencia: dados.frequencia,
-          skills: dados.skills,
-          movimentos_desenvolver: dados.movimentos_desenvolver,
-          lesoes: dados.lesoes,
-          ultima_semana: dados.ultima_semana,
-          volume: dados.volume,
-          contexto: dados.contexto,
-          tem_competicao: dados.tem_competicao,
-          competicao_nome: dados.competicao_nome,
-          competicao_data: dados.competicao_data,
-          competicao_categoria: dados.competicao_categoria
-        })
+        .update(perfilData)
+        .eq('id', dados.atleta_id)
         .select()
         .single();
 
-      if (insertError) throw insertError;
-      return res.json({ atleta_id: inserted.id, mensagem: 'Atleta cadastrado com sucesso!' });
+      if (error) throw error;
+      return res.json({ atleta_id: data.id, mensagem: 'Perfil atualizado com sucesso!' });
     }
 
-    res.json({ atleta_id: data.id, mensagem: 'Atleta cadastrado com sucesso!' });
+    // Sem atleta_id: upsert por email ou insert
+    if (dados.email) {
+      const { data, error } = await supabase
+        .from('atletas')
+        .upsert({ ...perfilData, email: dados.email.toLowerCase() }, { onConflict: 'email' })
+        .select()
+        .single();
+
+      if (!error) return res.json({ atleta_id: data.id, mensagem: 'Atleta cadastrado com sucesso!' });
+    }
+
+    // Insert limpo
+    const { data: inserted, error: insertError } = await supabase
+      .from('atletas')
+      .insert(perfilData)
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+    res.json({ atleta_id: inserted.id, mensagem: 'Atleta cadastrado com sucesso!' });
   } catch (err) {
     console.error('Erro ao cadastrar atleta:', err);
     res.status(500).json({ erro: 'Erro ao cadastrar atleta. Tente novamente.' });
   }
 });
+
+// GET /api/atleta/por-email/:email
+app.get('/api/atleta/por-email/:email', async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email).toLowerCase();
+    const { data, error } = await supabase
+      .from('atletas')
+      .select('id, nome, perfil_completo, nivel, frequencia')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar atleta.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// PROGRAMAÇÃO ROUTES
+// ═══════════════════════════════════════════════════════════════════
 
 // POST /api/programacao/gerar
 app.post('/api/programacao/gerar', async (req, res) => {
@@ -224,7 +370,14 @@ app.post('/api/programacao/gerar', async (req, res) => {
       return res.status(404).json({ erro: 'Atleta não encontrado.' });
     }
 
-    // Montar prompt com perfil
+    // Buscar check-ins recentes (últimas 4 semanas = ~12 treinos)
+    const { data: checkins } = await supabase
+      .from('checkins')
+      .select('*')
+      .eq('atleta_id', atleta_id)
+      .order('criado_em', { ascending: false })
+      .limit(12);
+
     const skillNames = {
       endurance: 'Resistência cardiovascular',
       stamina: 'Stamina',
@@ -242,12 +395,25 @@ app.post('/api/programacao/gerar', async (req, res) => {
     const deficiencias = Object.entries(skills)
       .filter(([, v]) => v <= 2)
       .map(([k]) => skillNames[k] || k);
-    const pontoFortes = Object.entries(skills)
+    const pontosFortes = Object.entries(skills)
       .filter(([, v]) => v >= 4)
       .map(([k]) => skillNames[k] || k);
 
-    let fase = 'Base';
+    // Calcular número da semana e fase
+    const { data: programacoesAnteriores } = await supabase
+      .from('programacoes')
+      .select('id, semana_numero, fase')
+      .eq('atleta_id', atleta_id)
+      .order('gerado_em', { ascending: false })
+      .limit(1);
+
     let semanaNumero = 1;
+    let fase = 'Base';
+
+    if (programacoesAnteriores && programacoesAnteriores.length > 0) {
+      semanaNumero = (programacoesAnteriores[0].semana_numero || 0) + 1;
+    }
+
     if (atleta.tem_competicao && atleta.competicao_data) {
       const hoje = new Date();
       const comp = new Date(atleta.competicao_data);
@@ -261,6 +427,36 @@ app.post('/api/programacao/gerar', async (req, res) => {
       else fase = 'Tapering';
     }
 
+    // Montar resumo dos check-ins para a IA
+    let checkinResumo = '';
+    if (checkins && checkins.length > 0) {
+      const mediaRPE = (checkins.reduce((a, c) => a + (c.rpe || 5), 0) / checkins.length).toFixed(1);
+      const mediaSensacao = (checkins.reduce((a, c) => a + (c.sensacao || 3), 0) / checkins.length).toFixed(1);
+      const movsDificeis = checkins
+        .flatMap(c => c.movimentos_dificeis || [])
+        .reduce((acc, m) => { acc[m] = (acc[m] || 0) + 1; return acc; }, {});
+      const topMovsDificeis = Object.entries(movsDificeis)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([m, n]) => `${m} (${n}x)`);
+      const lesoes = checkins.filter(c => c.nova_lesao).map(c => c.descricao_lesao).filter(Boolean);
+      const treinos = checkins.length;
+      const concluidos = checkins.filter(c => c.concluido).length;
+      const feedbacks = checkins.map(c => c.observacoes).filter(Boolean).slice(0, 3);
+
+      checkinResumo = `
+HISTÓRICO DE CHECK-INS (últimos ${treinos} treinos):
+- Treinos concluídos: ${concluidos}/${treinos}
+- Sensação média: ${mediaSensacao}/5
+- RPE médio: ${mediaRPE}/10
+- Movimentos mais difíceis: ${topMovsDificeis.length ? topMovsDificeis.join(', ') : 'nenhum registrado'}
+- Lesões/dores reportadas: ${lesoes.length ? lesoes.join(', ') : 'nenhuma'}
+- Feedbacks recentes: ${feedbacks.length ? feedbacks.join(' | ') : 'nenhum'}
+AJUSTE a programação com base neste histórico: se RPE médio > 8, reduza intensidade; se sensação < 3, priorize recuperação; inclua progressão nos movimentos difíceis.`;
+    } else {
+      checkinResumo = '\nHISTÓRICO DE CHECK-INS: Primeira semana — sem histórico ainda.';
+    }
+
     const perfilTexto = `
 PERFIL DO ATLETA:
 - Nome: ${atleta.nome}
@@ -271,13 +467,14 @@ PERFIL DO ATLETA:
 - Frequência semanal: ${atleta.frequencia}
 - Habilidades (1-5): ${Object.entries(skills).map(([k, v]) => `${skillNames[k] || k}: ${v}`).join(', ')}
 - Deficiências principais: ${deficiencias.length ? deficiencias.join(', ') : 'Nenhuma crítica'}
-- Pontos fortes: ${pontoFortes.length ? pontoFortes.join(', ') : 'Nenhum destaque'}
+- Pontos fortes: ${pontosFortes.length ? pontosFortes.join(', ') : 'Nenhum destaque'}
 - Movimentos para desenvolver: ${(atleta.movimentos_desenvolver || []).join(', ')}
 - Limitações físicas: ${(atleta.lesoes || []).join(', ') || 'Nenhuma'}
-- Últimas semanas: ${atleta.ultima_semana} (volume: ${atleta.volume})
+- Últimas semanas (auto-avaliação inicial): ${atleta.ultima_semana} (volume: ${atleta.volume})
 - Contexto adicional: ${atleta.contexto || 'Nenhum'}
 - Fase atual: ${fase} (semana ${semanaNumero})
 ${atleta.tem_competicao ? `- Competição: ${atleta.competicao_nome} em ${atleta.competicao_data} (categoria: ${atleta.competicao_categoria})` : ''}
+${checkinResumo}
 
 Gere a semana ${semanaNumero} da fase de ${fase}.`;
 
@@ -290,12 +487,9 @@ Gere a semana ${semanaNumero} da fase de ${fase}.`;
 
     const responseText = message.content[0].text;
 
-    // Extrair JSON da resposta
     let jsonStr = responseText;
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[0];
-    }
+    if (jsonMatch) jsonStr = jsonMatch[0];
 
     let semanaData;
     try {
@@ -305,24 +499,15 @@ Gere a semana ${semanaNumero} da fase de ${fase}.`;
       return res.status(500).json({ erro: 'Erro ao processar a programação gerada. Tente novamente.' });
     }
 
-    // Salvar no Supabase
     const { data: prog, error: progError } = await supabase
       .from('programacoes')
-      .insert({
-        atleta_id,
-        semana_numero: semanaNumero,
-        fase,
-        conteudo: semanaData
-      })
+      .insert({ atleta_id, semana_numero: semanaNumero, fase, conteudo: semanaData })
       .select()
       .single();
 
     if (progError) throw progError;
 
-    res.json({
-      programacao_id: prog.id,
-      semana: semanaData
-    });
+    res.json({ programacao_id: prog.id, semana: semanaData });
   } catch (err) {
     console.error('Erro ao gerar programação:', err);
     res.status(500).json({ erro: 'Erro ao gerar a programação. Tente novamente em alguns segundos.' });
@@ -341,18 +526,72 @@ app.get('/api/programacao/:atleta_id/atual', async (req, res) => {
       .limit(1)
       .single();
 
-    if (error || !data) {
-      return res.status(404).json({ erro: 'Nenhuma programação encontrada.' });
-    }
-
+    if (error || !data) return res.status(404).json({ erro: 'Nenhuma programação encontrada.' });
     res.json(data);
   } catch (err) {
-    console.error('Erro ao buscar programação:', err);
     res.status(500).json({ erro: 'Erro ao buscar programação.' });
   }
 });
 
-// POST /api/resultado/registrar
+// ═══════════════════════════════════════════════════════════════════
+// CHECK-IN ROUTES
+// ═══════════════════════════════════════════════════════════════════
+
+// POST /api/checkin/registrar
+app.post('/api/checkin/registrar', async (req, res) => {
+  try {
+    const {
+      atleta_id, programacao_id, data_checkin, dia_semana,
+      concluido, sensacao, rpe, movimentos_dificeis,
+      pontos_positivos, observacoes, nova_lesao, descricao_lesao, titulo_treino
+    } = req.body;
+
+    const { data, error } = await supabase
+      .from('checkins')
+      .insert({
+        atleta_id, programacao_id,
+        data_checkin: data_checkin || new Date().toISOString().split('T')[0],
+        dia_semana, concluido: concluido !== false,
+        sensacao, rpe, movimentos_dificeis,
+        pontos_positivos, observacoes,
+        nova_lesao: nova_lesao || false,
+        descricao_lesao, titulo_treino
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ sucesso: true, checkin: data });
+  } catch (err) {
+    console.error('Erro ao registrar check-in:', err);
+    res.status(500).json({ erro: 'Erro ao registrar check-in.' });
+  }
+});
+
+// GET /api/atleta/:atleta_id/checkins
+app.get('/api/atleta/:atleta_id/checkins', async (req, res) => {
+  try {
+    const { atleta_id } = req.params;
+    const limit = parseInt(req.query.limit) || 30;
+
+    const { data, error } = await supabase
+      .from('checkins')
+      .select('*')
+      .eq('atleta_id', atleta_id)
+      .order('criado_em', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar check-ins.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// RESULTADO ROUTES (legado, mantido para compatibilidade)
+// ═══════════════════════════════════════════════════════════════════
+
 app.post('/api/resultado/registrar', async (req, res) => {
   try {
     const { atleta_id, programacao_id, data_treino, dia_semana, resultado, observacoes } = req.body;
@@ -365,12 +604,10 @@ app.post('/api/resultado/registrar', async (req, res) => {
     if (error) throw error;
     res.json({ sucesso: true, resultado: data });
   } catch (err) {
-    console.error('Erro ao registrar resultado:', err);
     res.status(500).json({ erro: 'Erro ao registrar resultado.' });
   }
 });
 
-// GET /api/atleta/:atleta_id/resultados
 app.get('/api/atleta/:atleta_id/resultados', async (req, res) => {
   try {
     const { atleta_id } = req.params;
@@ -383,7 +620,6 @@ app.get('/api/atleta/:atleta_id/resultados', async (req, res) => {
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
-    console.error('Erro ao buscar resultados:', err);
     res.status(500).json({ erro: 'Erro ao buscar resultados.' });
   }
 });

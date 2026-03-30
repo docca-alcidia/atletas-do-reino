@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atletas do Reino — Histórico</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hist-header {
+      padding: 24px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hist-back {
+      color: var(--cinza);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .hist-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      color: var(--dourado);
+    }
+    /* Stats cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.1);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .stat-val {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: var(--dourado);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.68rem;
+      color: var(--cinza-escuro);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    /* Gráfico de sensação */
+    .chart-section {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.1);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .chart-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    #graficoSensacao { width: 100%; height: 80px; }
+    /* Movimentos difíceis - ranking */
+    .ranking-list { list-style: none; }
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(160,186,214,0.06);
+    }
+    .ranking-item:last-child { border-bottom: none; }
+    .rank-pos {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      width: 20px;
+      text-align: center;
+    }
+    .rank-nome { flex: 1; font-size: 0.9rem; color: var(--branco); }
+    .rank-bar-wrap {
+      flex: 2;
+      height: 6px;
+      background: rgba(160,186,214,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .rank-bar {
+      height: 100%;
+      background: #f87171;
+      border-radius: 3px;
+      transition: width 0.5s;
+    }
+    .rank-count {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza);
+      width: 30px;
+      text-align: right;
+    }
+    /* Cards de check-in */
+    .checkins-lista { margin-top: 8px; }
+    .ci-card {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .ci-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .ci-card-dia {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .ci-card-titulo {
+      font-size: 0.9rem;
+      color: var(--branco);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .ci-badge-conc {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .ci-badge-conc.sim {
+      background: rgba(74,222,128,0.1);
+      color: var(--verde);
+    }
+    .ci-badge-conc.nao {
+      background: rgba(248,113,113,0.1);
+      color: #f87171;
+    }
+    .ci-metrics {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .ci-metric {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.82rem;
+      color: var(--cinza);
+    }
+    .ci-metric .emoji { font-size: 1rem; }
+    .ci-metric .val { color: var(--branco); font-weight: 500; }
+    .ci-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .ci-tag-dif {
+      background: rgba(248,113,113,0.1);
+      color: #f87171;
+      border-radius: 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+    }
+    .ci-obs {
+      font-size: 0.82rem;
+      color: var(--cinza);
+      margin-top: 8px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+    .ci-lesao-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(242, 4, 218, 0.1);
+      border: 1px solid rgba(242,4,218,0.3);
+      color: var(--rosa);
+      border-radius: 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      margin-top: 6px;
+    }
+    /* Vazio */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--cinza-escuro);
+    }
+    .empty-state .ico { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 20px 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-bottom:32px;">
+    <div class="hist-header">
+      <a href="/programacao.html" class="hist-back">←</a>
+      <div>
+        <div class="hist-title">Histórico de Treinos</div>
+      </div>
+    </div>
+
+    <div id="loading" style="text-align:center;padding:40px;color:var(--cinza);">
+      Carregando histórico...
+    </div>
+
+    <div id="conteudo" style="display:none;">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val" id="statTotal">0</div>
+          <div class="stat-label">Treinos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statSensacao">—</div>
+          <div class="stat-label">Sensação Média</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statRPE">—</div>
+          <div class="stat-label">RPE Médio</div>
+        </div>
+      </div>
+
+      <!-- Gráfico sensação -->
+      <div class="chart-section" id="chartSection" style="display:none;">
+        <div class="chart-title">Sensação nos últimos treinos</div>
+        <canvas id="graficoSensacao"></canvas>
+        <div style="display:flex;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--cinza-escuro);margin-top:4px;">
+          <span>Mais antigo</span><span>Mais recente</span>
+        </div>
+      </div>
+
+      <!-- Movimentos difíceis -->
+      <div id="rankingSection" style="display:none;">
+        <div class="section-title">Movimentos mais difíceis</div>
+        <div class="chart-section" style="padding:14px 18px;">
+          <ul class="ranking-list" id="rankingList"></ul>
+        </div>
+      </div>
+
+      <!-- Lista de check-ins -->
+      <div class="section-title">Todos os check-ins</div>
+      <div class="checkins-lista" id="checkinsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const atletaId = localStorage.getItem('atletaId');
+
+    if (!atletaId) { window.location.href = '/login.html'; }
+
+    const EMOJIS = { 1: '😩', 2: '😕', 3: '😐', 4: '🙂', 5: '💪' };
+
+    function formatDate(str) {
+      if (!str) return '';
+      const d = new Date(str);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    async function carregarHistorico() {
+      try {
+        const res = await fetch(`${API_BASE}/api/atleta/${atletaId}/checkins?limit=50`);
+        const checkins = await res.json();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('conteudo').style.display = 'block';
+
+        if (!checkins || checkins.length === 0) {
+          document.getElementById('checkinsList').innerHTML = `
+            <div class="empty-state">
+              <div class="ico">📋</div>
+              <p>Nenhum check-in registrado ainda.<br>Complete um treino e registre como foi!</p>
+            </div>`;
+          return;
+        }
+
+        // Stats
+        const total = checkins.length;
+        const comSensacao = checkins.filter(c => c.sensacao);
+        const mediaSensacao = comSensacao.length
+          ? (comSensacao.reduce((a, c) => a + c.sensacao, 0) / comSensacao.length).toFixed(1)
+          : '—';
+        const comRPE = checkins.filter(c => c.rpe);
+        const mediaRPE = comRPE.length
+          ? (comRPE.reduce((a, c) => a + c.rpe, 0) / comRPE.length).toFixed(1)
+          : '—';
+
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statSensacao').textContent =
+          mediaSensacao !== '—' ? `${EMOJIS[Math.round(mediaSensacao)] || ''} ${mediaSensacao}` : '—';
+        document.getElementById('statRPE').textContent = mediaRPE !== '—' ? `${mediaRPE}/10` : '—';
+
+        // Gráfico sensação
+        const comSens = checkins.filter(c => c.sensacao).slice(0, 15).reverse();
+        if (comSens.length > 1) {
+          document.getElementById('chartSection').style.display = 'block';
+          desenharGrafico(comSens.map(c => c.sensacao));
+        }
+
+        // Ranking movimentos difíceis
+        const movsCont = {};
+        checkins.forEach(c => {
+          (c.movimentos_dificeis || []).forEach(m => { movsCont[m] = (movsCont[m] || 0) + 1; });
+        });
+        const movsOrdenados = Object.entries(movsCont).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        if (movsOrdenados.length > 0) {
+          document.getElementById('rankingSection').style.display = 'block';
+          const maxCount = movsOrdenados[0][1];
+          const ul = document.getElementById('rankingList');
+          ul.innerHTML = movsOrdenados.map(([mov, count], i) => `
+            <li class="ranking-item">
+              <span class="rank-pos">${i + 1}</span>
+              <span class="rank-nome">${mov}</span>
+              <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(count/maxCount*100).toFixed(0)}%"></div></div>
+              <span class="rank-count">${count}x</span>
+            </li>
+          `).join('');
+        }
+
+        // Cards dos check-ins
+        const lista = document.getElementById('checkinsList');
+        lista.innerHTML = checkins.map(c => {
+          const movsHtml = (c.movimentos_dificeis || []).length
+            ? `<div class="ci-tags">${c.movimentos_dificeis.map(m => `<span class="ci-tag-dif">${m}</span>`).join('')}</div>`
+            : '';
+          const obsHtml = c.observacoes
+            ? `<div class="ci-obs">"${c.observacoes}"</div>` : '';
+          const positHtml = c.pontos_positivos
+            ? `<div class="ci-obs" style="color:var(--verde);">"${c.pontos_positivos}"</div>` : '';
+          const lesaoHtml = c.nova_lesao && c.descricao_lesao
+            ? `<div class="ci-lesao-badge">⚠ ${c.descricao_lesao}</div>` : '';
+          return `
+            <div class="ci-card">
+              <div class="ci-card-header">
+                <div>
+                  <div class="ci-card-dia">${formatDate(c.criado_em)} · ${c.dia_semana || ''}</div>
+                  <div class="ci-card-titulo">${c.titulo_treino || 'Treino'}</div>
+                </div>
+                <span class="ci-badge-conc ${c.concluido ? 'sim' : 'nao'}">${c.concluido ? '✓ Completo' : '✗ Parcial'}</span>
+              </div>
+              <div class="ci-metrics">
+                ${c.sensacao ? `<div class="ci-metric"><span class="emoji">${EMOJIS[c.sensacao]}</span><span class="val">${c.sensacao}/5</span></div>` : ''}
+                ${c.rpe ? `<div class="ci-metric"><span>RPE</span><span class="val">${c.rpe}/10</span></div>` : ''}
+              </div>
+              ${movsHtml}${obsHtml}${positHtml}${lesaoHtml}
+            </div>`;
+        }).join('');
+
+      } catch (err) {
+        document.getElementById('loading').innerHTML = '<p style="color:#f87171;">Erro ao carregar histórico.</p>';
+      }
+    }
+
+    function desenharGrafico(dados) {
+      const canvas = document.getElementById('graficoSensacao');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.offsetWidth;
+      const H = 80;
+      canvas.width = W;
+      canvas.height = H;
+
+      const pad = 10;
+      const stepX = (W - pad * 2) / (dados.length - 1);
+
+      // Área preenchida
+      ctx.beginPath();
+      dados.forEach((val, i) => {
+        const x = pad + i * stepX;
+        const y = H - pad - ((val - 1) / 4) * (H - pad * 2);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.lineTo(pad + (dados.length - 1) * stepX, H);
+      ctx.lineTo(pad, H);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, 'rgba(212,168,50,0.3)');
+      grad.addColorStop(1, 'rgba(212,168,50,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Linha
+      ctx.beginPath();
+      dados.forEach((val, i) => {
+        const x = pad + i * stepX;
+        const y = H - pad - ((val - 1) / 4) * (H - pad * 2);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = 'var(--dourado)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Pontos
+      dados.forEach((val, i) => {
+        const x = pad + i * stepX;
+        const y = H - pad - ((val - 1) / 4) * (H - pad * 2);
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'var(--dourado)';
+        ctx.fill();
+      });
+    }
+
+    carregarHistorico();
+  </script>
+</body>
+</html>

@@ -11,11 +11,11 @@
   const diasAbrev = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
 
   function init() {
-    atletaId = localStorage.getItem('atleta_id');
-    const atletaNome = localStorage.getItem('atleta_nome');
+    atletaId = localStorage.getItem('atletaId') || localStorage.getItem('atleta_id');
+    const atletaNome = localStorage.getItem('atletaNome') || localStorage.getItem('atleta_nome');
 
     if (!atletaId) {
-      window.location.href = 'index.html';
+      window.location.href = '/login.html';
       return;
     }
 
@@ -238,13 +238,32 @@
       </div>`;
     }
 
-    // Result button (show for today or past days)
+    // Botões de ação (hoje ou passado)
     const hoje = new Date().getDay();
     const todayIdx = hoje === 0 ? 6 : hoje - 1;
     if (currentDayIndex <= todayIdx) {
-      html += `<button class="btn-result" onclick="document.getElementById('resultModal').classList.add('show')">
-        Registrar Resultado
-      </button>`;
+      // Coletar movimentos do dia para o check-in
+      const movsDia = [];
+      [dia.aquecimento, dia.forca, dia.wod, dia.acessorios].forEach(bloco => {
+        if (bloco && bloco.exercicios) {
+          bloco.exercicios.forEach(ex => { if (ex.nome) movsDia.push(ex.nome); });
+        }
+      });
+      const movsEncoded = encodeURIComponent(JSON.stringify([...new Set(movsDia)]));
+      const tituloEncoded = encodeURIComponent(dia.titulo || dia.dia_semana || 'Treino');
+      const diaEncoded = encodeURIComponent(dia.dia_semana || diasSemana[currentDayIndex]);
+      const progId = programacaoId || localStorage.getItem('programacaoId') || '';
+
+      html += `<div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn-result" style="flex:1;background:var(--dourado);color:var(--azul);"
+          onclick="window.location.href='/checkin.html?dia=${diaEncoded}&titulo=${tituloEncoded}&prog=${progId}&movs=${movsEncoded}'">
+          ✓ Check-in do Treino
+        </button>
+        <button class="btn-result" style="flex:0 0 auto;background:var(--azul-claro);color:var(--cinza);border:1px solid rgba(160,186,214,0.15);"
+          onclick="document.getElementById('resultModal').classList.add('show')">
+          📝
+        </button>
+      </div>`;
     }
 
     container.innerHTML = html;

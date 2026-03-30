@@ -325,23 +325,30 @@
     btnGerar.disabled = true;
 
     try {
-      // Cadastrar atleta
+      // Se veio do login, usa o atletaId existente para atualizar o perfil
+      const atletaIdExistente = localStorage.getItem('atletaId');
+      if (atletaIdExistente) data.atleta_id = atletaIdExistente;
+
+      // Cadastrar / atualizar atleta
       const cadastro = await API.cadastrarAtleta(data);
       const atletaId = cadastro.atleta_id;
 
-      // Salvar no localStorage
-      localStorage.setItem('atleta_id', atletaId);
-      localStorage.setItem('atleta_nome', data.nome);
+      // Salvar no localStorage (padronizado)
+      localStorage.setItem('atletaId', atletaId);
+      localStorage.setItem('atleta_id', atletaId); // compatibilidade
+      localStorage.setItem('atletaNome', data.nome);
+      localStorage.setItem('atleta_nome', data.nome); // compatibilidade
 
       // Gerar programação
       const prog = await API.gerarProgramacao(atletaId);
 
       // Salvar programação no localStorage como backup
-      localStorage.setItem('programacao_id', prog.programacao_id);
+      localStorage.setItem('programacaoId', prog.programacao_id);
+      localStorage.setItem('programacao_id', prog.programacao_id); // compatibilidade
       localStorage.setItem('programacao_data', JSON.stringify(prog.semana));
 
       // Redirecionar
-      window.location.href = 'programacao.html';
+      window.location.href = '/programacao.html';
     } catch (err) {
       hideLoading();
       btnGerar.disabled = false;

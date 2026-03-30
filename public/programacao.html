@@ -11,7 +11,13 @@
 
     <!-- Header -->
     <div class="prog-header">
-      <div class="badge" id="faseBadge">FASE DE BASE · SEMANA 1</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="badge" id="faseBadge">FASE DE BASE · SEMANA 1</div>
+        <div style="display:flex;gap:8px;">
+          <a href="/historico.html" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--cinza);text-decoration:none;background:rgba(160,186,214,0.08);border:1px solid rgba(160,186,214,0.15);border-radius:8px;padding:4px 10px;letter-spacing:0.05em;text-transform:uppercase;">📊 Histórico</a>
+          <button onclick="fazerLogout()" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--cinza-escuro);background:transparent;border:1px solid rgba(160,186,214,0.1);border-radius:8px;padding:4px 10px;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;">Sair</button>
+        </div>
+      </div>
       <h2 id="semanaTitulo">Semana de Treinos</h2>
       <div class="atleta-nome" id="atletaNome"></div>
     </div>
@@ -76,5 +82,16 @@
 
   <script src="js/api.js"></script>
   <script src="js/programacao.js"></script>
+  <script>
+    function fazerLogout() {
+      if (confirm('Deseja sair da sua conta?')) {
+        localStorage.removeItem('adr_token');
+        localStorage.removeItem('atletaId');
+        localStorage.removeItem('atletaNome');
+        localStorage.removeItem('programacaoId');
+        window.location.href = '/login.html';
+      }
+    }
+  </script>
 </body>
 </html>
