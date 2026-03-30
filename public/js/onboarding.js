@@ -13,8 +13,11 @@
     categoria_competicao: '',
     objetivos: [],
     frequencia: '',
+    tempo_treino_disponivel: '',
+    local_treino: '',
     skills: {},
     movimentos_desenvolver: [],
+    prs: {},
     lesoes: [],
     ultima_semana: '',
     volume: '',
@@ -25,32 +28,93 @@
     competicao_categoria: ''
   };
 
-  // Skills definition
+  // Skills definition — descrições práticas para leigos
   const skills = [
-    { key: 'endurance', name: 'Resistência cardiovascular', desc: 'corrida, remo, bike' },
-    { key: 'stamina', name: 'Stamina', desc: 'manter ritmo por tempo longo' },
-    { key: 'forca', name: 'Força muscular', desc: 'levantar cargas máximas' },
-    { key: 'flexibilidade', name: 'Flexibilidade', desc: 'mobilidade articular' },
-    { key: 'potencia', name: 'Potência', desc: 'força máxima em mínimo tempo' },
-    { key: 'velocidade', name: 'Velocidade', desc: 'ciclo rápido de movimentos' },
-    { key: 'coordenacao', name: 'Coordenação', desc: 'combinar padrões de movimento' },
-    { key: 'agilidade', name: 'Agilidade', desc: 'transição entre movimentos' },
-    { key: 'equilibrio', name: 'Equilíbrio', desc: 'controle do centro de gravidade' },
-    { key: 'precisao', name: 'Precisão', desc: 'controle de direção e intensidade' }
+    {
+      key: 'endurance',
+      name: 'Resistência cardiovascular',
+      desc: 'quanto tempo aguenta no remo, bike ou corrida',
+      exemplos: ['1 = Para depois de 2 min correndo', '3 = Corre 5km sem parar', '5 = Mantém ritmo alto por 30min+']
+    },
+    {
+      key: 'stamina',
+      name: 'Stamina (fôlego)',
+      desc: 'manter intensidade em WODs longos',
+      exemplos: ['1 = Já canso nos primeiros rounds', '3 = Mantenho até o meio do WOD', '5 = Ritmo consistente do início ao fim']
+    },
+    {
+      key: 'forca',
+      name: 'Força muscular',
+      desc: 'capacidade de levantar cargas pesadas',
+      exemplos: ['1 = Dificuldade com barra vazia', '3 = Agacho 1x meu peso corporal', '5 = Levanto cargas altas com facilidade']
+    },
+    {
+      key: 'flexibilidade',
+      name: 'Flexibilidade / Mobilidade',
+      desc: 'amplitude de movimento nas articulações',
+      exemplos: ['1 = Não chego ao fundo no agachamento', '3 = Agacho ok, overhead limitado', '5 = OHS profundo sem compensações']
+    },
+    {
+      key: 'potencia',
+      name: 'Potência / Explosão',
+      desc: 'força rápida em saltos, LPO e sprints',
+      exemplos: ['1 = Box jump baixo, saltos fracos', '3 = Box jump 60cm, LPO básico', '5 = Salto alto, LPO explosivo']
+    },
+    {
+      key: 'velocidade',
+      name: 'Velocidade de movimento',
+      desc: 'ciclo rápido de repetições (thrusters, wall balls)',
+      exemplos: ['1 = Movimentos lentos e pesados', '3 = Ritmo médio nos ciclos', '5 = Cicla rápido sem perder técnica']
+    },
+    {
+      key: 'coordenacao',
+      name: 'Coordenação',
+      desc: 'facilidade de aprender movimentos novos',
+      exemplos: ['1 = Dificuldade com movimentos combinados', '3 = Aprendo com algumas repetições', '5 = Pego movimentos novos rápido']
+    },
+    {
+      key: 'agilidade',
+      name: 'Agilidade',
+      desc: 'transição rápida entre exercícios diferentes',
+      exemplos: ['1 = Lento para trocar de estação', '3 = Transição razoável', '5 = Troco de movimento sem perder tempo']
+    },
+    {
+      key: 'equilibrio',
+      name: 'Equilíbrio',
+      desc: 'controle corporal em pistol squat, handstand, HSPU',
+      exemplos: ['1 = Dificuldade até em pistol squat', '3 = Pistol ok, handstand instável', '5 = Handstand walk, L-sit estáveis']
+    },
+    {
+      key: 'precisao',
+      name: 'Precisão técnica',
+      desc: 'controle fino em movimentos olímpicos e ginástica',
+      exemplos: ['1 = Técnica muito inconsistente', '3 = Técnica ok em movimentos básicos', '5 = Técnica sólida mesmo sob fadiga']
+    }
   ];
 
-  const levelLabels = ['', 'Muito fraco', 'Fraco', 'Médio', 'Forte', 'Muito forte'];
+  const levelLabels = {
+    1: { text: 'Preciso desenvolver muito', color: '#f87171' },
+    2: { text: 'Abaixo da média', color: '#fb923c' },
+    3: { text: 'Na média', color: 'var(--cinza)' },
+    4: { text: 'Acima da média', color: '#4ade80' },
+    5: { text: 'Ponto forte!', color: 'var(--dourado)' }
+  };
 
   // Init skills sliders
   function initSkills() {
     const container = document.getElementById('skillsContainer');
     container.innerHTML = skills.map(s => `
-      <div class="slider-group">
+      <div class="slider-group" style="margin-bottom:20px;">
         <div class="slider-label">
-          <span>${s.name} <small style="color:var(--cinza-escuro)">(${s.desc})</small></span>
-          <span class="val" id="val_${s.key}">3 — Médio</span>
+          <span style="font-size:0.9rem;color:var(--branco);font-weight:500;">${s.name}</span>
+          <span class="val" id="val_${s.key}" style="color:var(--cinza);">3 — Na média</span>
         </div>
+        <div style="font-size:0.78rem;color:var(--cinza-escuro);margin-bottom:6px;">${s.desc}</div>
         <input type="range" min="1" max="5" value="3" id="skill_${s.key}" data-key="${s.key}">
+        <div class="skill-levels">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        </div>
+        <div class="skill-example" id="ex_${s.key}">${s.exemplos[1]}</div>
       </div>
     `).join('');
 
@@ -58,10 +122,15 @@
       slider.addEventListener('input', function() {
         const val = parseInt(this.value);
         const key = this.dataset.key;
+        const skill = skills.find(s => s.key === key);
         data.skills[key] = val;
-        document.getElementById(`val_${key}`).textContent = `${val} — ${levelLabels[val]}`;
+        const lbl = levelLabels[val];
+        document.getElementById(`val_${key}`).textContent = `${val} — ${lbl.text}`;
+        document.getElementById(`val_${key}`).style.color = lbl.color;
+        // Exemplo correspondente
+        const exIdx = val <= 1 ? 0 : val >= 5 ? 2 : val <= 3 ? 1 : 2;
+        document.getElementById(`ex_${key}`).textContent = skill.exemplos[exIdx];
       });
-      // Set default
       data.skills[slider.dataset.key] = 3;
     });
   }
@@ -69,6 +138,7 @@
   // Single select handlers
   function initSingleSelect(containerId, dataKey) {
     const container = document.getElementById(containerId);
+    if (!container) return;
     container.querySelectorAll('.op').forEach(op => {
       op.addEventListener('click', function() {
         container.querySelectorAll('.op').forEach(o => o.classList.remove('sel'));
@@ -81,6 +151,7 @@
   // Multi select handlers
   function initMultiSelect(containerId, dataKey, countId) {
     const container = document.getElementById(containerId);
+    if (!container) return;
     container.querySelectorAll('.mp').forEach(mp => {
       mp.addEventListener('click', function() {
         this.classList.toggle('sel');
@@ -102,7 +173,6 @@
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-
     if (age < 18) return 'teens';
     if (age <= 34) return 'adulto';
     if (age <= 44) return 'm35';
@@ -138,19 +208,9 @@
     const dateVal = document.getElementById('compData').value;
     const preview = document.getElementById('periodPreview');
     const bar = document.getElementById('periodBar');
-
-    if (!dateVal) {
-      preview.classList.remove('show');
-      return;
-    }
-
+    if (!dateVal) { preview.classList.remove('show'); return; }
     const p = calcPeriodizacao(dateVal);
-    if (!p) {
-      preview.classList.remove('show');
-      return;
-    }
-
-    const total = p.semanas;
+    if (!p) { preview.classList.remove('show'); return; }
     bar.innerHTML = `
       <div class="base" style="flex:${p.base}">${p.base}sem</div>
       <div class="forca" style="flex:${p.forca}">${p.forca}sem</div>
@@ -160,67 +220,93 @@
     preview.classList.add('show');
   }
 
+  // Collect PRs from inputs
+  function collectPRs() {
+    const prFields = [
+      { id: 'pr_backsquat', key: 'back_squat' },
+      { id: 'pr_frontsquat', key: 'front_squat' },
+      { id: 'pr_deadlift', key: 'deadlift' },
+      { id: 'pr_press', key: 'strict_press' },
+      { id: 'pr_snatch', key: 'snatch' },
+      { id: 'pr_cleanjerk', key: 'clean_jerk' },
+      { id: 'pr_bench', key: 'bench_press' },
+      { id: 'pr_remo500', key: 'remo_500m' }
+    ];
+    const prs = {};
+    prFields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (el && el.value.trim()) prs[f.key] = el.value.trim();
+    });
+    data.prs = prs;
+  }
+
   // Summary rendering
   function renderSummary() {
     const container = document.getElementById('summaryContent');
+    const skillsHtml = Object.entries(data.skills).map(([k, v]) => {
+      const s = skills.find(s => s.key === k);
+      const lbl = levelLabels[v];
+      return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(160,186,214,0.06);">
+        <span style="font-size:0.82rem;color:var(--cinza)">${s ? s.name : k}</span>
+        <span style="font-size:0.82rem;font-weight:600;color:${lbl.color}">${v}/5</span>
+      </div>`;
+    }).join('');
 
-    const skillsHtml = Object.entries(data.skills)
-      .map(([k, v]) => {
-        const s = skills.find(s => s.key === k);
-        const color = v <= 2 ? 'var(--laranja)' : v >= 4 ? 'var(--verde)' : 'var(--cinza)';
-        return `<div style="display:flex;justify-content:space-between;padding:3px 0;">
-          <span style="font-size:0.85rem;color:var(--cinza)">${s ? s.name : k}</span>
-          <span style="font-size:0.85rem;font-weight:600;color:${color}">${v}/5</span>
-        </div>`;
-      }).join('');
+    const prsHtml = Object.entries(data.prs || {}).length
+      ? Object.entries(data.prs).map(([k, v]) => `<span class="pill blue">${k.replace(/_/g,' ')}: ${v}${k.includes('remo') ? '' : 'kg'}</span>`).join('')
+      : '<span style="color:var(--cinza-escuro);font-size:0.82rem;">Nenhum PR informado</span>';
+
+    const localLabels = {
+      box: 'Box / Academia', casa_equip: 'Casa com equipamentos',
+      casa_sem: 'Casa sem equipamentos', viagem: 'Viagem / Hotel', ar_livre: 'Ao ar livre'
+    };
 
     container.innerHTML = `
       <div class="summary-card">
         <h4>Identificação</h4>
         <p><strong style="color:var(--branco)">${data.nome || 'Não informado'}</strong></p>
         <p>Categoria: ${catLabels[data.categoria] || 'Não calculada'}</p>
-        <p>Tempo de treino: ${data.tempo_treino || 'Não informado'}</p>
+        <p>Tempo de treino: ${data.tempo_treino || '-'}</p>
       </div>
-
       <div class="summary-card">
         <h4>Nível e Categoria</h4>
-        <p>Nível: <span style="color:var(--dourado)">${data.nivel || 'Não informado'}</span></p>
-        <p>Competição: ${data.categoria_competicao || 'Não informada'}</p>
+        <p>Nível: <span style="color:var(--dourado)">${data.nivel || '-'}</span></p>
+        <p>Competição: ${data.categoria_competicao || '-'}</p>
       </div>
-
       <div class="summary-card">
-        <h4>Objetivos</h4>
-        <div class="pills">
+        <h4>Rotina de Treino</h4>
+        <p>Frequência: <span style="color:var(--dourado)">${data.frequencia || '-'}</span></p>
+        <p>Tempo disponível: ${data.tempo_treino_disponivel || '-'}</p>
+        <p>Local: ${localLabels[data.local_treino] || data.local_treino || '-'}</p>
+        <div class="pills" style="margin-top:8px;">
           ${(data.objetivos || []).map(o => `<span class="pill green">${o}</span>`).join('')}
         </div>
-        <p style="margin-top:8px">Frequência: <span style="color:var(--dourado)">${data.frequencia || '-'}</span></p>
       </div>
-
       <div class="summary-card">
         <h4>Habilidades Físicas</h4>
         ${skillsHtml}
       </div>
-
       <div class="summary-card">
         <h4>Movimentos para Desenvolver</h4>
         <div class="pills">
-          ${(data.movimentos_desenvolver || []).map(m => `<span class="pill blue">${m}</span>`).join('')}
+          ${(data.movimentos_desenvolver || []).map(m => `<span class="pill blue">${m}</span>`).join('') || '<span style="color:var(--cinza-escuro);font-size:0.82rem;">Nenhum selecionado</span>'}
         </div>
       </div>
-
+      <div class="summary-card">
+        <h4>Recordes Pessoais</h4>
+        <div class="pills">${prsHtml}</div>
+      </div>
       <div class="summary-card">
         <h4>Últimas Semanas</h4>
-        <p>Estado: ${data.ultima_semana || 'Não informado'} | Volume: ${data.volume || '-'}</p>
-        ${data.contexto ? `<p style="margin-top:6px;font-style:italic">"${data.contexto}"</p>` : ''}
+        <p>Estado: ${data.ultima_semana || '-'} | Volume: ${data.volume || '-'}</p>
+        ${data.contexto ? `<p style="margin-top:6px;font-style:italic;color:var(--cinza)">"${data.contexto}"</p>` : ''}
       </div>
-
       <div class="summary-card">
         <h4>Limitações</h4>
         <div class="pills">
-          ${(data.lesoes || []).map(l => `<span class="pill pink">${l}</span>`).join('')}
+          ${(data.lesoes || []).map(l => `<span class="pill pink">${l}</span>`).join('') || '<span style="color:var(--cinza-escuro);font-size:0.82rem;">Nenhuma</span>'}
         </div>
       </div>
-
       ${data.tem_competicao ? `
       <div class="summary-card">
         <h4>Competição</h4>
@@ -233,24 +319,18 @@
   // Navigation
   function goToStep(step) {
     if (step < 1 || step > totalSteps) return;
-
-    // Collect data from current step before leaving
     collectStepData(currentStep);
-
     currentStep = step;
 
-    // Update progress bar
     document.querySelectorAll('.progress-bar .step').forEach((el, i) => {
       el.classList.remove('active', 'done');
       if (i + 1 < currentStep) el.classList.add('done');
       if (i + 1 === currentStep) el.classList.add('active');
     });
 
-    // Show/hide steps
     document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
     document.getElementById(`step${currentStep}`).classList.add('active');
 
-    // Show/hide nav buttons
     document.getElementById('btnPrev').style.display = currentStep > 1 ? '' : 'none';
     const navBtns = document.getElementById('navBtns');
     if (currentStep === totalSteps) {
@@ -269,6 +349,9 @@
         data.nome = document.getElementById('nome').value.trim();
         data.data_nascimento = document.getElementById('dataNascimento').value;
         data.categoria = calcCategoria(data.data_nascimento);
+        break;
+      case 5:
+        collectPRs();
         break;
       case 6:
         data.contexto = document.getElementById('contexto').value.trim();
@@ -297,7 +380,6 @@
     const overlay = document.getElementById('loadingOverlay');
     const msgEl = document.getElementById('loadingMsg');
     overlay.classList.add('show');
-
     let idx = 0;
     const interval = setInterval(() => {
       idx++;
@@ -309,7 +391,6 @@
         }, 200);
       }
     }, 2500);
-
     return () => {
       clearInterval(interval);
       overlay.classList.remove('show');
@@ -319,35 +400,30 @@
   // Generate program
   async function gerarProgramacao() {
     collectStepData(currentStep);
+    collectPRs();
 
     const hideLoading = showLoading();
     const btnGerar = document.getElementById('btnGerar');
     btnGerar.disabled = true;
 
     try {
-      // Se veio do login, usa o atletaId existente para atualizar o perfil
       const atletaIdExistente = localStorage.getItem('atletaId');
       if (atletaIdExistente) data.atleta_id = atletaIdExistente;
 
-      // Cadastrar / atualizar atleta
       const cadastro = await API.cadastrarAtleta(data);
       const atletaId = cadastro.atleta_id;
 
-      // Salvar no localStorage (padronizado)
       localStorage.setItem('atletaId', atletaId);
-      localStorage.setItem('atleta_id', atletaId); // compatibilidade
+      localStorage.setItem('atleta_id', atletaId);
       localStorage.setItem('atletaNome', data.nome);
-      localStorage.setItem('atleta_nome', data.nome); // compatibilidade
+      localStorage.setItem('atleta_nome', data.nome);
 
-      // Gerar programação
       const prog = await API.gerarProgramacao(atletaId);
 
-      // Salvar programação no localStorage como backup
       localStorage.setItem('programacaoId', prog.programacao_id);
-      localStorage.setItem('programacao_id', prog.programacao_id); // compatibilidade
+      localStorage.setItem('programacao_id', prog.programacao_id);
       localStorage.setItem('programacao_data', JSON.stringify(prog.semana));
 
-      // Redirecionar
       window.location.href = '/programacao.html';
     } catch (err) {
       hideLoading();
@@ -360,42 +436,36 @@
   function init() {
     initSkills();
 
-    // Single selects
     initSingleSelect('tempoTreino', 'tempo_treino');
     initSingleSelect('nivel', 'nivel');
     initSingleSelect('categoriaComp', 'categoria_competicao');
     initSingleSelect('frequencia', 'frequencia');
+    initSingleSelect('tempoDisponivel', 'tempo_treino_disponivel');
+    initSingleSelect('localTreino', 'local_treino');
     initSingleSelect('ultimaSemana', 'ultima_semana');
     initSingleSelect('volume', 'volume');
     initSingleSelect('compCat', 'competicao_categoria');
 
-    // Multi selects
     initMultiSelect('objetivos', 'objetivos', 'objCount');
-    initMultiSelect('movLPO', 'movimentos_desenvolver', 'movCount');
-    initMultiSelect('movGin', 'movimentos_desenvolver', 'movCount');
-    initMultiSelect('movAneis', 'movimentos_desenvolver', 'movCount');
-    initMultiSelect('movPlio', 'movimentos_desenvolver', 'movCount');
-    initMultiSelect('movCardio', 'movimentos_desenvolver', 'movCount');
     initMultiSelect('lesoes', 'lesoes', null);
 
-    // Fix multi-select for movements (collect from all groups)
+    // Movimentos — coleta de todos os grupos
     const movGroups = ['movLPO', 'movGin', 'movAneis', 'movPlio', 'movCardio'];
     movGroups.forEach(gid => {
-      document.getElementById(gid).querySelectorAll('.mp').forEach(mp => {
-        mp.removeEventListener('click', mp._handler);
-        mp._handler = function() {
-          // Recollect all selected movements
+      const grp = document.getElementById(gid);
+      if (!grp) return;
+      grp.querySelectorAll('.mp').forEach(mp => {
+        mp.addEventListener('click', function() {
+          this.classList.toggle('sel');
           const all = [];
           movGroups.forEach(g => {
-            document.getElementById(g).querySelectorAll('.mp.sel').forEach(s => {
-              all.push(s.dataset.val);
-            });
+            const el = document.getElementById(g);
+            if (el) el.querySelectorAll('.mp.sel').forEach(s => all.push(s.dataset.val));
           });
           data.movimentos_desenvolver = all;
           document.getElementById('movCount').textContent =
             all.length ? `${all.length} movimento${all.length > 1 ? 's' : ''} selecionado${all.length > 1 ? 's' : ''}` : '';
-        };
-        mp.addEventListener('click', mp._handler);
+        });
       });
     });
 
@@ -404,7 +474,7 @@
       const cat = calcCategoria(this.value);
       const el = document.getElementById('categoriaAuto');
       if (cat) {
-        el.textContent = `Categoria: ${catLabels[cat]}`;
+        el.textContent = `Categoria automática: ${catLabels[cat]}`;
         el.style.display = 'block';
         data.categoria = cat;
       } else {
@@ -417,17 +487,12 @@
       document.getElementById('compFields').classList.toggle('show', this.checked);
     });
 
-    // Competition date → periodization
     document.getElementById('compData').addEventListener('change', renderPeriodizacao);
 
-    // Nav buttons
     document.getElementById('btnNext').addEventListener('click', () => goToStep(currentStep + 1));
     document.getElementById('btnPrev').addEventListener('click', () => goToStep(currentStep - 1));
-
-    // Generate button
     document.getElementById('btnGerar').addEventListener('click', gerarProgramacao);
 
-    // Init first step
     goToStep(1);
   }
 

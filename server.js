@@ -284,8 +284,11 @@ app.post('/api/atleta/cadastrar', async (req, res) => {
       categoria_competicao: dados.categoria_competicao,
       objetivos: dados.objetivos,
       frequencia: dados.frequencia,
+      tempo_treino_disponivel: dados.tempo_treino_disponivel || null,
+      local_treino: dados.local_treino || null,
       skills: dados.skills,
       movimentos_desenvolver: dados.movimentos_desenvolver,
+      prs: dados.prs || null,
       lesoes: dados.lesoes,
       ultima_semana: dados.ultima_semana,
       volume: dados.volume,
@@ -460,6 +463,20 @@ AJUSTE a programação com base neste histórico: se RPE médio > 8, reduza inte
       checkinResumo = '\nHISTÓRICO DE CHECK-INS: Primeira semana — sem histórico ainda.';
     }
 
+    // Formatar PRs para o prompt
+    const prs = atleta.prs || {};
+    const prsTexto = Object.keys(prs).length
+      ? Object.entries(prs).map(([k, v]) => `${k.replace(/_/g,' ')}: ${v}${k.includes('remo') ? 'min' : 'kg'}`).join(', ')
+      : 'Não informado';
+
+    const localLabels = {
+      box: 'Box / Academia de treino funcional (equipamento completo)',
+      casa_equip: 'Casa com equipamentos básicos (barra, anilhas, halteres)',
+      casa_sem: 'Casa sem equipamentos (apenas peso corporal)',
+      viagem: 'Viagem / Hotel (sem equipamentos ou muito limitado)',
+      ar_livre: 'Ao ar livre'
+    };
+
     const perfilTexto = `
 PERFIL DO ATLETA:
 - Nome: ${atleta.nome}
@@ -468,10 +485,13 @@ PERFIL DO ATLETA:
 - Nível: ${atleta.nivel}
 - Objetivos: ${(atleta.objetivos || []).join(', ')}
 - Frequência semanal: ${atleta.frequencia}
+- Tempo disponível por treino: ${atleta.tempo_treino_disponivel || 'Não informado'} — RESPEITE ESTE LIMITE
+- Local de treino: ${localLabels[atleta.local_treino] || atleta.local_treino || 'Box'} — ADAPTE OS EXERCÍCIOS AO LOCAL
 - Habilidades (1-5): ${Object.entries(skills).map(([k, v]) => `${skillNames[k] || k}: ${v}`).join(', ')}
 - Deficiências principais: ${deficiencias.length ? deficiencias.join(', ') : 'Nenhuma crítica'}
 - Pontos fortes: ${pontosFortes.length ? pontosFortes.join(', ') : 'Nenhum destaque'}
 - Movimentos para desenvolver: ${(atleta.movimentos_desenvolver || []).join(', ')}
+- Recordes pessoais: ${prsTexto} — USE ESSES VALORES PARA PRESCREVER % DE CARGA
 - Limitações físicas: ${(atleta.lesoes || []).join(', ') || 'Nenhuma'}
 - Últimas semanas (auto-avaliação inicial): ${atleta.ultima_semana} (volume: ${atleta.volume})
 - Contexto adicional: ${atleta.contexto || 'Nenhum'}
@@ -479,7 +499,8 @@ PERFIL DO ATLETA:
 ${atleta.tem_competicao ? `- Competição: ${atleta.competicao_nome} em ${atleta.competicao_data} (categoria: ${atleta.competicao_categoria})` : ''}
 ${checkinResumo}
 
-Gere a semana ${semanaNumero} da fase de ${fase}.`;
+Gere a semana ${semanaNumero} da fase de ${fase}.
+IMPORTANTE: Adapte todos os treinos ao local "${atleta.local_treino || 'box'}" e ao tempo disponível "${atleta.tempo_treino_disponivel || '1h'}".`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
