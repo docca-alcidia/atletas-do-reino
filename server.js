@@ -652,6 +652,89 @@ app.get('/api/atleta/:atleta_id/resultados', async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// PRs ROUTES
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /api/atleta/:atleta_id/prs — retorna PRs atuais + histórico
+app.get('/api/atleta/:atleta_id/prs', async (req, res) => {
+  try {
+    const { atleta_id } = req.params;
+
+    const { data: atleta, error: atletaError } = await supabase
+      .from('atletas')
+      .select('prs, nome')
+      .eq('id', atleta_id)
+      .single();
+
+    if (atletaError || !atleta) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+
+    const { data: historico } = await supabase
+      .from('pr_historico')
+      .select('*')
+      .eq('atleta_id', atleta_id)
+      .order('registrado_em', { ascending: false });
+
+    res.json({ prs: atleta.prs || {}, historico: historico || [] });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar PRs.' });
+  }
+});
+
+// POST /api/atleta/:atleta_id/prs — atualiza PRs e salva histórico dos que melhoraram
+app.post('/api/atleta/:atleta_id/prs', async (req, res) => {
+  try {
+    const { atleta_id } = req.params;
+    const { prs } = req.body;
+
+    if (!prs || typeof prs !== 'object') {
+      return res.status(400).json({ erro: 'PRs inválidos.' });
+    }
+
+    // Buscar PRs atuais para comparar
+    const { data: atleta } = await supabase
+      .from('atletas')
+      .select('prs')
+      .eq('id', atleta_id)
+      .single();
+
+    const prsAtuais = atleta?.prs || {};
+    const registros = [];
+
+    // Para cada PR que melhorou, salvar no histórico
+    for (const [movimento, valor] of Object.entries(prs)) {
+      const novo = parseFloat(valor);
+      const atual = parseFloat(prsAtuais[movimento] || 0);
+      if (!isNaN(novo) && novo > 0 && novo !== atual) {
+        registros.push({
+          atleta_id,
+          movimento,
+          valor: novo,
+          valor_anterior: atual || null
+        });
+      }
+    }
+
+    // Atualizar PRs no perfil
+    const { error: updateError } = await supabase
+      .from('atletas')
+      .update({ prs })
+      .eq('id', atleta_id);
+
+    if (updateError) throw updateError;
+
+    // Salvar histórico dos PRs alterados
+    if (registros.length > 0) {
+      await supabase.from('pr_historico').insert(registros);
+    }
+
+    res.json({ sucesso: true, atualizados: registros.length });
+  } catch (err) {
+    console.error('Erro ao atualizar PRs:', err);
+    res.status(500).json({ erro: err.message || 'Erro ao atualizar PRs.' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Atletas do Reino rodando na porta ${PORT}`);

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atletas do Reino — Meus PRs</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .prs-header {
+      padding: 28px 0 12px;
+      text-align: center;
+    }
+    .prs-header h2 {
+      font-size: 1.4rem;
+      color: var(--dourado);
+      margin-bottom: 4px;
+    }
+    .prs-header p {
+      font-size: 0.82rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--cinza);
+      text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 12px 0 0;
+    }
+    .back-btn:hover { color: var(--branco); }
+
+    .pr-section {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.1);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .pr-section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      color: var(--cinza-escuro);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(160,186,214,0.08);
+    }
+
+    .pr-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(160,186,214,0.06);
+    }
+    .pr-row:last-child { border-bottom: none; }
+
+    .pr-info { flex: 1; }
+    .pr-nome {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--branco);
+      margin-bottom: 1px;
+    }
+    .pr-atual {
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .pr-atual span {
+      color: var(--dourado);
+      font-weight: 600;
+    }
+
+    .pr-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pr-input {
+      width: 80px;
+      background: rgba(160,186,214,0.06);
+      border: 1px solid rgba(160,186,214,0.15);
+      border-radius: 8px;
+      color: var(--branco);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .pr-input:focus {
+      border-color: var(--dourado);
+    }
+    .pr-unit {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cinza-escuro);
+      width: 28px;
+    }
+
+    .pr-novo-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.65rem;
+      color: var(--verde);
+      background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.25);
+      border-radius: 5px;
+      padding: 2px 6px;
+      letter-spacing: 0.05em;
+      display: none;
+    }
+
+    .btn-salvar {
+      width: 100%;
+      background: var(--dourado);
+      color: var(--azul);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-salvar:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-salvar:hover:not(:disabled) { opacity: 0.9; }
+
+    /* Histórico */
+    .historico-section {
+      margin-top: 24px;
+    }
+    .historico-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      color: var(--cinza-escuro);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .historico-empty {
+      text-align: center;
+      color: var(--cinza-escuro);
+      font-size: 0.82rem;
+      padding: 20px 0;
+    }
+    .pr-hist-card {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pr-hist-mov {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--branco);
+    }
+    .pr-hist-data {
+      font-size: 0.72rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      margin-top: 1px;
+    }
+    .pr-hist-valor {
+      text-align: right;
+    }
+    .pr-hist-novo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--dourado);
+    }
+    .pr-hist-anterior {
+      font-size: 0.72rem;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .pr-hist-seta {
+      color: var(--verde);
+      font-size: 0.7rem;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: rgba(160,186,214,0.06);
+      border: 1px solid rgba(160,186,214,0.12);
+      border-radius: 10px;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(212,168,50,0.12);
+      border-color: rgba(212,168,50,0.35);
+      color: var(--dourado);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-bottom:40px;">
+
+    <a href="/programacao.html" class="back-btn">← Voltar para Programação</a>
+
+    <div class="prs-header">
+      <h2>🏆 Meus Recordes</h2>
+      <p>Atualize seus PRs sempre que bater um novo recorde</p>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabAtualizar" onclick="showTab('atualizar')">Atualizar PRs</button>
+      <button class="tab-btn" id="tabHistorico" onclick="showTab('historico')">Histórico</button>
+    </div>
+
+    <!-- Tab: Atualizar PRs -->
+    <div id="panelAtualizar">
+      <div class="pr-section">
+        <div class="pr-section-title">⚡ Levantamentos Olímpicos & Força</div>
+
+        <div class="pr-row" data-mov="back_squat">
+          <div class="pr-info">
+            <div class="pr-nome">Back Squat</div>
+            <div class="pr-atual">Atual: <span id="val_back_squat">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_back_squat" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_back_squat">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="front_squat">
+          <div class="pr-info">
+            <div class="pr-nome">Front Squat</div>
+            <div class="pr-atual">Atual: <span id="val_front_squat">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_front_squat" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_front_squat">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="deadlift">
+          <div class="pr-info">
+            <div class="pr-nome">Deadlift</div>
+            <div class="pr-atual">Atual: <span id="val_deadlift">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_deadlift" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_deadlift">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="strict_press">
+          <div class="pr-info">
+            <div class="pr-nome">Strict Press</div>
+            <div class="pr-atual">Atual: <span id="val_strict_press">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_strict_press" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_strict_press">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="snatch">
+          <div class="pr-info">
+            <div class="pr-nome">Snatch</div>
+            <div class="pr-atual">Atual: <span id="val_snatch">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_snatch" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_snatch">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="clean_jerk">
+          <div class="pr-info">
+            <div class="pr-nome">Clean & Jerk</div>
+            <div class="pr-atual">Atual: <span id="val_clean_jerk">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_clean_jerk" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_clean_jerk">NOVO!</span>
+          </div>
+        </div>
+
+        <div class="pr-row" data-mov="bench_press">
+          <div class="pr-info">
+            <div class="pr-nome">Bench Press</div>
+            <div class="pr-atual">Atual: <span id="val_bench_press">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="number" class="pr-input" id="inp_bench_press" placeholder="0" min="0" step="0.5">
+            <span class="pr-unit">kg</span>
+            <span class="pr-novo-badge" id="badge_bench_press">NOVO!</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pr-section">
+        <div class="pr-section-title">🚣 Cardio</div>
+        <div class="pr-row" data-mov="remo_500m">
+          <div class="pr-info">
+            <div class="pr-nome">500m Remo</div>
+            <div class="pr-atual">Atual: <span id="val_remo_500m">—</span></div>
+          </div>
+          <div class="pr-input-wrap">
+            <input type="text" class="pr-input" id="inp_remo_500m" placeholder="1:45" style="width:90px;">
+            <span class="pr-unit" style="width:36px;font-size:0.68rem;">min</span>
+            <span class="pr-novo-badge" id="badge_remo_500m">NOVO!</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-salvar" id="btnSalvar" onclick="salvarPRs()">Salvar PRs</button>
+    </div>
+
+    <!-- Tab: Histórico -->
+    <div id="panelHistorico" style="display:none;">
+      <div id="historicoContainer">
+        <div class="historico-empty">Carregando...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const atletaId = localStorage.getItem('atletaId') || localStorage.getItem('atleta_id');
+    if (!atletaId) window.location.href = '/login.html';
+
+    const movimentos = ['back_squat','front_squat','deadlift','strict_press','snatch','clean_jerk','bench_press','remo_500m'];
+    let prsAtuais = {};
+
+    async function carregarPRs() {
+      try {
+        const res = await fetch(`/api/atleta/${atletaId}/prs`);
+        const data = await res.json();
+        prsAtuais = data.prs || {};
+
+        movimentos.forEach(mov => {
+          const val = prsAtuais[mov];
+          const el = document.getElementById('val_' + mov);
+          if (el) el.textContent = val ? `${val}${mov === 'remo_500m' ? ' min' : ' kg'}` : '—';
+        });
+
+        renderHistorico(data.historico || []);
+      } catch(e) {
+        console.error('Erro ao carregar PRs:', e);
+      }
+    }
+
+    function renderHistorico(historico) {
+      const container = document.getElementById('historicoContainer');
+      if (!historico.length) {
+        container.innerHTML = '<div class="historico-empty">Nenhum PR registrado ainda.<br>Atualize seus recordes acima!</div>';
+        return;
+      }
+
+      const nomes = {
+        back_squat: 'Back Squat', front_squat: 'Front Squat', deadlift: 'Deadlift',
+        strict_press: 'Strict Press', snatch: 'Snatch', clean_jerk: 'Clean & Jerk',
+        bench_press: 'Bench Press', remo_500m: '500m Remo'
+      };
+
+      container.innerHTML = historico.map(h => {
+        const unidade = h.movimento === 'remo_500m' ? 'min' : 'kg';
+        const dataFormatada = new Date(h.registrado_em).toLocaleDateString('pt-BR', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+        const melhora = h.valor_anterior ? ((h.valor - h.valor_anterior)).toFixed(1) : null;
+
+        return `<div class="pr-hist-card">
+          <div>
+            <div class="pr-hist-mov">${nomes[h.movimento] || h.movimento}</div>
+            <div class="pr-hist-data">${dataFormatada}</div>
+          </div>
+          <div class="pr-hist-valor">
+            <div class="pr-hist-novo">${h.valor} ${unidade}</div>
+            ${h.valor_anterior
+              ? `<div class="pr-hist-anterior">antes: ${h.valor_anterior} ${unidade} <span class="pr-hist-seta">▲ +${melhora}${unidade}</span></div>`
+              : '<div class="pr-hist-anterior">primeiro registro</div>'
+            }
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Detecta se o valor mudou e mostra badge NOVO
+    movimentos.forEach(mov => {
+      const inp = document.getElementById('inp_' + mov);
+      if (!inp) return;
+      inp.addEventListener('input', function() {
+        const badge = document.getElementById('badge_' + mov);
+        const novo = parseFloat(this.value);
+        const atual = parseFloat(prsAtuais[mov] || 0);
+        if (badge) badge.style.display = (novo > atual && novo > 0) ? 'inline-block' : 'none';
+      });
+    });
+
+    async function salvarPRs() {
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      const novosPrs = { ...prsAtuais };
+      movimentos.forEach(mov => {
+        const inp = document.getElementById('inp_' + mov);
+        if (inp && inp.value.trim() !== '') {
+          novosPrs[mov] = inp.value.trim();
+        }
+      });
+
+      try {
+        const res = await fetch(`/api/atleta/${atletaId}/prs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prs: novosPrs })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro);
+
+        // Limpar inputs e recarregar
+        movimentos.forEach(mov => {
+          const inp = document.getElementById('inp_' + mov);
+          if (inp) inp.value = '';
+          const badge = document.getElementById('badge_' + mov);
+          if (badge) badge.style.display = 'none';
+        });
+
+        await carregarPRs();
+
+        btn.textContent = data.atualizados > 0
+          ? `✓ ${data.atualizados} PR(s) atualizado(s)!`
+          : '✓ Salvo sem alterações';
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Salvar PRs';
+        }, 2500);
+
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Salvar PRs';
+        alert(e.message || 'Erro ao salvar. Tente novamente.');
+      }
+    }
+
+    function showTab(tab) {
+      document.getElementById('panelAtualizar').style.display = tab === 'atualizar' ? '' : 'none';
+      document.getElementById('panelHistorico').style.display = tab === 'historico' ? '' : 'none';
+      document.getElementById('tabAtualizar').classList.toggle('active', tab === 'atualizar');
+      document.getElementById('tabHistorico').classList.toggle('active', tab === 'historico');
+    }
+
+    carregarPRs();
+  </script>
+</body>
+</html>
