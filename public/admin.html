@@ -340,7 +340,7 @@
     function filtrar() {
       const q = document.getElementById('searchInput').value.toLowerCase();
       let lista = todosAtletas.filter(a => {
-        const matchBusca = !q || a.nome?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q);
+        const matchBusca = !q || (a.nome || '').toLowerCase().includes(q) || (a.email || '').toLowerCase().includes(q);
         const matchStatus = filtroStatus === 'todos' || a.status === filtroStatus;
         return matchBusca && matchStatus;
       });
