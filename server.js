@@ -735,6 +735,142 @@ app.post('/api/atleta/:atleta_id/prs', async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// ADMIN ROUTES
+// ═══════════════════════════════════════════════════════════════════
+
+const ADMIN_KEY = process.env.ADMIN_KEY || 'adr_admin_2024';
+
+function adminAuth(req, res, next) {
+  const key = req.headers['x-admin-key'] || req.query.key;
+  if (key !== ADMIN_KEY) return res.status(401).json({ erro: 'Acesso negado.' });
+  next();
+}
+
+// GET /api/admin/stats — KPIs gerais
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
+  try {
+    const agora = new Date();
+    const set7 = new Date(agora - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const set30 = new Date(agora - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const inicioSemana = new Date(agora - (agora.getDay() || 7) * 24 * 60 * 60 * 1000);
+    inicioSemana.setHours(0, 0, 0, 0);
+
+    const [{ count: totalAtletas }, { count: novosSemana }, checkins7, checkins30, todosCheckins] = await Promise.all([
+      supabase.from('atletas').select('*', { count: 'exact', head: true }),
+      supabase.from('atletas').select('*', { count: 'exact', head: true }).gte('criado_em', inicioSemana.toISOString()),
+      supabase.from('checkins').select('atleta_id', { count: 'exact' }).gte('criado_em', set7),
+      supabase.from('checkins').select('atleta_id', { count: 'exact' }).gte('criado_em', set30),
+      supabase.from('checkins').select('rpe, sensacao').gte('criado_em', set30).limit(500),
+    ]);
+
+    const checkins7Ids = new Set((checkins7.data || []).map(c => c.atleta_id));
+    const ativosUltimos7 = checkins7Ids.size;
+    const allC = todosCheckins.data || [];
+    const mediaRPE = allC.length ? (allC.reduce((a, c) => a + (c.rpe || 5), 0) / allC.length).toFixed(1) : '—';
+    const mediaSensacao = allC.length ? (allC.reduce((a, c) => a + (c.sensacao || 3), 0) / allC.length).toFixed(1) : '—';
+
+    res.json({
+      total_atletas: totalAtletas || 0,
+      novos_semana: novosSemana || 0,
+      ativos_7dias: ativosUltimos7,
+      inativos: (totalAtletas || 0) - ativosUltimos7,
+      checkins_30dias: checkins30.count || 0,
+      media_rpe: mediaRPE,
+      media_sensacao: mediaSensacao,
+    });
+  } catch (err) {
+    console.error('Erro admin stats:', err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// GET /api/admin/atletas — lista completa com dados agregados
+app.get('/api/admin/atletas', adminAuth, async (req, res) => {
+  try {
+    const { data: atletas, error } = await supabase
+      .from('atletas')
+      .select('id, nome, email, nivel, frequencia, criado_em, cidade, estado, objetivos, lesoes, tempo_treino, local_treino, prs, skills, movimentos_desenvolver, contexto')
+      .order('criado_em', { ascending: false });
+
+    if (error) throw error;
+
+    // Buscar programações e check-ins de todos os atletas
+    const ids = (atletas || []).map(a => a.id);
+    const [{ data: progs }, { data: checkins }] = await Promise.all([
+      supabase.from('programacoes').select('atleta_id, semana_numero, gerado_em').in('atleta_id', ids),
+      supabase.from('checkins').select('atleta_id, criado_em, sensacao, rpe, concluido').in('atleta_id', ids).order('criado_em', { ascending: false }),
+    ]);
+
+    // Agrupar por atleta
+    const progMap = {};
+    (progs || []).forEach(p => {
+      if (!progMap[p.atleta_id] || p.semana_numero > progMap[p.atleta_id].semana_numero) {
+        progMap[p.atleta_id] = p;
+      }
+    });
+
+    const checkinMap = {};
+    (checkins || []).forEach(c => {
+      if (!checkinMap[c.atleta_id]) checkinMap[c.atleta_id] = [];
+      checkinMap[c.atleta_id].push(c);
+    });
+
+    const resultado = (atletas || []).map(a => {
+      const meusProg = progMap[a.id];
+      const meusCheckins = checkinMap[a.id] || [];
+      const ultimoCheckin = meusCheckins[0]?.criado_em || null;
+      const diasSemCheckin = ultimoCheckin
+        ? Math.floor((Date.now() - new Date(ultimoCheckin)) / (1000 * 60 * 60 * 24))
+        : null;
+      const mediaRPE = meusCheckins.length
+        ? (meusCheckins.slice(0, 10).reduce((acc, c) => acc + (c.rpe || 5), 0) / Math.min(meusCheckins.length, 10)).toFixed(1)
+        : null;
+      const mediaSensacao = meusCheckins.length
+        ? (meusCheckins.slice(0, 10).reduce((acc, c) => acc + (c.sensacao || 3), 0) / Math.min(meusCheckins.length, 10)).toFixed(1)
+        : null;
+
+      let status = 'novo';
+      if (meusCheckins.length > 0) {
+        status = diasSemCheckin !== null && diasSemCheckin <= 7 ? 'ativo' : 'inativo';
+      }
+
+      return {
+        ...a,
+        semanas_geradas: progMap[a.id]?.semana_numero || 0,
+        total_checkins: meusCheckins.length,
+        ultimo_checkin: ultimoCheckin,
+        dias_sem_checkin: diasSemCheckin,
+        media_rpe: mediaRPE,
+        media_sensacao: mediaSensacao,
+        status,
+      };
+    });
+
+    res.json(resultado);
+  } catch (err) {
+    console.error('Erro admin atletas:', err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// GET /api/admin/atleta/:id — detalhes completos de 1 atleta
+app.get('/api/admin/atleta/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [{ data: atleta }, { data: checkins }, { data: progs }, { data: prsHist }] = await Promise.all([
+      supabase.from('atletas').select('*').eq('id', id).single(),
+      supabase.from('checkins').select('*').eq('atleta_id', id).order('criado_em', { ascending: false }).limit(20),
+      supabase.from('programacoes').select('id, semana_numero, fase, gerado_em').eq('atleta_id', id).order('gerado_em', { ascending: false }),
+      supabase.from('pr_historico').select('*').eq('atleta_id', id).order('registrado_em', { ascending: false }).limit(30),
+    ]);
+    if (!atleta) return res.status(404).json({ erro: 'Atleta não encontrado.' });
+    res.json({ atleta, checkins: checkins || [], programacoes: progs || [], pr_historico: prsHist || [] });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Atletas do Reino rodando na porta ${PORT}`);

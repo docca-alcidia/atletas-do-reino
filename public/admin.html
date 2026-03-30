@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADR — Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── LOGIN ── */
+    .login-wrap {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .login-box {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.15);
+      border-radius: 18px;
+      padding: 36px 28px;
+      width: 100%; max-width: 340px;
+      text-align: center;
+    }
+    .login-box h2 { font-size: 1.3rem; color: var(--dourado); margin-bottom: 6px; }
+    .login-box p { font-size: 0.8rem; color: var(--cinza-escuro); margin-bottom: 24px; }
+    .login-input {
+      width: 100%;
+      background: rgba(160,186,214,0.07);
+      border: 1px solid rgba(160,186,214,0.18);
+      border-radius: 10px;
+      color: var(--branco);
+      font-family: 'Barlow', sans-serif;
+      font-size: 1rem;
+      padding: 12px 14px;
+      outline: none;
+      margin-bottom: 14px;
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+    .login-input:focus { border-color: var(--dourado); }
+    .login-btn {
+      width: 100%;
+      background: var(--dourado); color: var(--azul);
+      border: none; border-radius: 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 12px; cursor: pointer;
+    }
+    .login-erro { color: #ff6b6b; font-size: 0.8rem; margin-top: 10px; }
+
+    /* ── DASHBOARD ── */
+    .admin-wrap { display: none; }
+
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid rgba(160,186,214,0.1);
+      margin-bottom: 20px;
+    }
+    .admin-header h1 { font-size: 1.1rem; color: var(--dourado); }
+    .admin-header span { font-size: 0.75rem; color: var(--cinza-escuro); font-family: 'Barlow Condensed', sans-serif; }
+    .logout-link { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; color: var(--cinza-escuro); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; background: none; border: none; }
+
+    /* ── KPIs ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.1);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .kpi-card.destaque { border-color: rgba(212,168,50,0.25); background: rgba(212,168,50,0.06); }
+    .kpi-valor { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--branco); line-height: 1; }
+    .kpi-card.destaque .kpi-valor { color: var(--dourado); }
+    .kpi-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; color: var(--cinza-escuro); letter-spacing: 0.07em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ── FILTROS ── */
+    .filtros {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1; min-width: 160px;
+      background: rgba(160,186,214,0.07);
+      border: 1px solid rgba(160,186,214,0.14);
+      border-radius: 9px;
+      color: var(--branco);
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--dourado); }
+    .filtro-btn {
+      background: rgba(160,186,214,0.07);
+      border: 1px solid rgba(160,186,214,0.12);
+      border-radius: 8px;
+      color: var(--cinza-escuro);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 6px 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .filtro-btn.active { background: rgba(212,168,50,0.1); border-color: rgba(212,168,50,0.3); color: var(--dourado); }
+
+    /* ── LISTA ATLETAS ── */
+    .atletas-count { font-size: 0.75rem; color: var(--cinza-escuro); font-family: 'Barlow Condensed', sans-serif; margin-bottom: 10px; }
+    .atleta-row {
+      background: var(--azul-card);
+      border: 1px solid rgba(160,186,214,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .atleta-row:hover { border-color: rgba(212,168,50,0.2); background: rgba(212,168,50,0.03); }
+    .atleta-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .atleta-nome-email .nome { font-weight: 600; font-size: 0.95rem; color: var(--branco); }
+    .atleta-nome-email .email { font-size: 0.72rem; color: var(--cinza-escuro); font-family: 'Barlow Condensed', sans-serif; }
+    .status-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 20px; font-weight: 700;
+    }
+    .status-ativo { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .status-inativo { background: rgba(255,99,71,0.1); color: #ff6347; border: 1px solid rgba(255,99,71,0.2); }
+    .status-novo { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+    .atleta-meta {
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .meta-item { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; color: var(--cinza-escuro); }
+    .meta-item b { color: var(--cinza); font-weight: 600; }
+    .nivel-pill {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem;
+      padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em;
+    }
+    .nivel-iniciante { background: rgba(160,186,214,0.1); color: var(--cinza); }
+    .nivel-avancado { background: rgba(212,168,50,0.1); color: var(--dourado); }
+    .nivel-rx { background: rgba(242,4,218,0.1); color: #f204da; }
+
+    /* ── MODAL DETALHE ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,20,40,0.85);
+      display: none; align-items: flex-end; justify-content: center;
+      z-index: 100; padding: 0;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-sheet {
+      background: #0f2645;
+      border-radius: 20px 20px 0 0;
+      border: 1px solid rgba(160,186,214,0.15);
+      width: 100%; max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px 20px 40px;
+    }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: rgba(160,186,214,0.2);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-close {
+      float: right; background: none; border: none;
+      color: var(--cinza-escuro); font-size: 1.2rem; cursor: pointer;
+    }
+    .modal-nome { font-size: 1.2rem; font-weight: 700; color: var(--branco); margin-bottom: 2px; }
+    .modal-email { font-size: 0.8rem; color: var(--cinza-escuro); font-family: 'Barlow Condensed', sans-serif; margin-bottom: 16px; }
+
+    .detail-section { margin-top: 18px; }
+    .detail-section-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem;
+      color: var(--cinza-escuro); letter-spacing: 0.1em; text-transform: uppercase;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(160,186,214,0.08); margin-bottom: 10px;
+    }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-item { background: rgba(160,186,214,0.05); border-radius: 8px; padding: 8px 10px; }
+    .detail-item .label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; color: var(--cinza-escuro); text-transform: uppercase; letter-spacing: 0.06em; }
+    .detail-item .value { font-size: 0.88rem; color: var(--branco); font-weight: 600; margin-top: 1px; }
+
+    .checkin-mini {
+      background: rgba(160,186,214,0.05); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .checkin-mini .data { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; color: var(--cinza-escuro); }
+    .checkin-mini .metricas { display: flex; gap: 10px; }
+    .checkin-mini .met { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; color: var(--cinza); }
+    .checkin-mini .met b { color: var(--dourado); }
+    .checkin-obs { font-size: 0.78rem; color: var(--cinza-escuro); font-style: italic; margin-top: 2px; }
+
+    .skills-bar-wrap { margin-bottom: 8px; }
+    .skills-bar-label { display: flex; justify-content: space-between; font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; color: var(--cinza-escuro); margin-bottom: 3px; }
+    .skills-bar-track { background: rgba(160,186,214,0.1); border-radius: 3px; height: 5px; }
+    .skills-bar-fill { height: 5px; border-radius: 3px; background: var(--dourado); }
+
+    .pr-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .pr-mini { background: rgba(160,186,214,0.05); border-radius: 7px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .pr-mini .mov { font-size: 0.75rem; color: var(--cinza); }
+    .pr-mini .val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--dourado); }
+
+    .empty-state { text-align: center; color: var(--cinza-escuro); font-size: 0.82rem; padding: 16px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ LOGIN ══ -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+      <h2>🔐 Admin</h2>
+      <p>Atletas do Reino — Painel de Gestão</p>
+      <input type="password" class="login-input" id="adminSenha" placeholder="Senha de acesso" onkeydown="if(event.key==='Enter')entrar()">
+      <button class="login-btn" onclick="entrar()">Entrar</button>
+      <div class="login-erro" id="loginErro"></div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="container admin-wrap" id="adminWrap" style="padding-bottom:40px;">
+
+    <div class="admin-header">
+      <div>
+        <h1>🏟️ Atletas do Reino</h1>
+        <span>Painel do Coach</span>
+      </div>
+      <button class="logout-link" onclick="sair()">Sair</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card destaque"><div class="kpi-valor" id="kpiTotal">—</div><div class="kpi-label">Total atletas</div></div>
+      <div class="kpi-card"><div class="kpi-valor" id="kpiAtivos" style="color:var(--verde)">—</div><div class="kpi-label">Ativos 7 dias</div></div>
+      <div class="kpi-card"><div class="kpi-valor" id="kpiNovos" style="color:var(--azul-tag)">—</div><div class="kpi-label">Novos semana</div></div>
+      <div class="kpi-card"><div class="kpi-valor" id="kpiInativos" style="color:var(--laranja)">—</div><div class="kpi-label">Inativos</div></div>
+      <div class="kpi-card"><div class="kpi-valor" id="kpiRPE">—</div><div class="kpi-label">RPE médio</div></div>
+      <div class="kpi-card"><div class="kpi-valor" id="kpiSensacao">—</div><div class="kpi-label">Sensação média</div></div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar atleta..." oninput="filtrar()">
+      <button class="filtro-btn active" data-f="todos" onclick="setFiltro(this,'todos')">Todos</button>
+      <button class="filtro-btn" data-f="ativo" onclick="setFiltro(this,'ativo')">Ativos</button>
+      <button class="filtro-btn" data-f="inativo" onclick="setFiltro(this,'inativo')">Inativos</button>
+      <button class="filtro-btn" data-f="novo" onclick="setFiltro(this,'novo')">Novos</button>
+    </div>
+
+    <div class="atletas-count" id="atletasCount"></div>
+    <div id="atletasList"></div>
+  </div>
+
+  <!-- ══ MODAL DETALHE ══ -->
+  <div class="modal-overlay" id="detalheModal" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <div id="detalheContent">Carregando...</div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_KEY_LS = 'adr_admin_key';
+    let adminKey = localStorage.getItem(ADMIN_KEY_LS) || '';
+    let todosAtletas = [];
+    let filtroStatus = 'todos';
+
+    // ══ LOGIN ══
+    async function entrar() {
+      const senha = document.getElementById('adminSenha').value.trim();
+      if (!senha) return;
+      // Testa a chave fazendo uma requisição real
+      const res = await fetch('/api/admin/stats', { headers: { 'x-admin-key': senha } });
+      if (res.ok) {
+        adminKey = senha;
+        localStorage.setItem(ADMIN_KEY_LS, senha);
+        mostrarDashboard();
+      } else {
+        document.getElementById('loginErro').textContent = 'Senha incorreta.';
+      }
+    }
+
+    function sair() {
+      localStorage.removeItem(ADMIN_KEY_LS);
+      adminKey = '';
+      document.getElementById('loginWrap').style.display = 'flex';
+      document.getElementById('adminWrap').style.display = 'none';
+    }
+
+    async function mostrarDashboard() {
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('adminWrap').style.display = 'block';
+      await Promise.all([carregarStats(), carregarAtletas()]);
+    }
+
+    // Auto-login se tiver chave salva
+    if (adminKey) mostrarDashboard().catch(() => {
+      localStorage.removeItem(ADMIN_KEY_LS); adminKey = '';
+    });
+
+    // ══ STATS ══
+    async function carregarStats() {
+      const res = await fetch('/api/admin/stats', { headers: { 'x-admin-key': adminKey } });
+      const d = await res.json();
+      document.getElementById('kpiTotal').textContent = d.total_atletas;
+      document.getElementById('kpiAtivos').textContent = d.ativos_7dias;
+      document.getElementById('kpiNovos').textContent = d.novos_semana;
+      document.getElementById('kpiInativos').textContent = d.inativos;
+      document.getElementById('kpiRPE').textContent = d.media_rpe;
+      document.getElementById('kpiSensacao').textContent = d.media_sensacao;
+    }
+
+    // ══ ATLETAS ══
+    async function carregarAtletas() {
+      const res = await fetch('/api/admin/atletas', { headers: { 'x-admin-key': adminKey } });
+      todosAtletas = await res.json();
+      filtrar();
+    }
+
+    function setFiltro(btn, f) {
+      document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtroStatus = f;
+      filtrar();
+    }
+
+    function filtrar() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      let lista = todosAtletas.filter(a => {
+        const matchBusca = !q || a.nome?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q);
+        const matchStatus = filtroStatus === 'todos' || a.status === filtroStatus;
+        return matchBusca && matchStatus;
+      });
+      renderAtletas(lista);
+    }
+
+    const nivelLabel = { iniciante: 'Iniciante', avancado: 'Avançado', rx: 'RX' };
+    const sensacaoEmoji = ['', '😩', '😕', '😐', '🙂', '💪'];
+
+    function renderAtletas(lista) {
+      document.getElementById('atletasCount').textContent = `${lista.length} atleta${lista.length !== 1 ? 's' : ''}`;
+      if (!lista.length) {
+        document.getElementById('atletasList').innerHTML = '<div class="empty-state">Nenhum atleta encontrado.</div>';
+        return;
+      }
+
+      document.getElementById('atletasList').innerHTML = lista.map(a => {
+        const statusCls = `status-${a.status}`;
+        const statusTxt = a.status === 'ativo' ? 'Ativo' : a.status === 'inativo' ? 'Inativo' : 'Novo';
+        const nivelCls = `nivel-${a.nivel || 'iniciante'}`;
+        const ultimoTxt = a.dias_sem_checkin !== null
+          ? (a.dias_sem_checkin === 0 ? 'Hoje' : a.dias_sem_checkin === 1 ? 'Ontem' : `${a.dias_sem_checkin}d atrás`)
+          : '—';
+        const sen = a.media_sensacao ? `${sensacaoEmoji[Math.round(a.media_sensacao)]} ${a.media_sensacao}` : '—';
+
+        return `<div class="atleta-row" onclick="abrirDetalhe('${a.id}')">
+          <div class="atleta-row-top">
+            <div class="atleta-nome-email">
+              <div class="nome">${a.nome || '—'}</div>
+              <div class="email">${a.email || ''}</div>
+            </div>
+            <span class="status-badge ${statusCls}">${statusTxt}</span>
+          </div>
+          <div class="atleta-meta">
+            <div class="meta-item"><span class="nivel-pill ${nivelCls}">${nivelLabel[a.nivel] || a.nivel || '—'}</span></div>
+            <div class="meta-item">📅 <b>${a.frequencia || '—'}x</b>/sem</div>
+            <div class="meta-item">📋 <b>${a.semanas_geradas}</b> semanas</div>
+            <div class="meta-item">✓ <b>${a.total_checkins}</b> check-ins</div>
+            <div class="meta-item">⏱ <b>${ultimoTxt}</b></div>
+            <div class="meta-item">💪 RPE <b>${a.media_rpe || '—'}</b></div>
+            <div class="meta-item">${sen}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ══ MODAL DETALHE ══
+    async function abrirDetalhe(id) {
+      document.getElementById('detalheModal').classList.add('show');
+      document.getElementById('detalheContent').innerHTML = '<div class="empty-state">Carregando...</div>';
+
+      const res = await fetch(`/api/admin/atleta/${id}`, { headers: { 'x-admin-key': adminKey } });
+      const d = await res.json();
+      renderDetalhe(d);
+    }
+
+    function fecharModal() {
+      document.getElementById('detalheModal').classList.remove('show');
+    }
+
+    function renderDetalhe({ atleta: a, checkins, programacoes, pr_historico }) {
+      const skillNames = {
+        endurance:'Resistência', stamina:'Stamina', forca:'Força', flexibilidade:'Flexibilidade',
+        potencia:'Potência', velocidade:'Velocidade', coordenacao:'Coordenação',
+        agilidade:'Agilidade', equilibrio:'Equilíbrio', precisao:'Precisão'
+      };
+      const prs = a.prs || {};
+      const prNomes = {
+        back_squat:'Back Squat', front_squat:'Front Squat', deadlift:'Deadlift',
+        strict_press:'Strict Press', snatch:'Snatch', clean_jerk:'C&J',
+        bench_press:'Bench', power_clean:'Power Clean', power_snatch:'Power Snatch',
+        thruster:'Thruster', overhead_squat:'OHS', remo_500m:'500m Remo'
+      };
+      const dias_cadastro = a.criado_em
+        ? Math.floor((Date.now() - new Date(a.criado_em)) / (1000*60*60*24))
+        : '—';
+
+      // Skills bars
+      const skillsHtml = Object.entries(a.skills || {}).map(([k, v]) =>
+        `<div class="skills-bar-wrap">
+          <div class="skills-bar-label"><span>${skillNames[k]||k}</span><span>${v}/5</span></div>
+          <div class="skills-bar-track"><div class="skills-bar-fill" style="width:${v*20}%;background:${v<=2?'var(--laranja)':v>=4?'var(--dourado)':'var(--cinza-tag)'}"></div></div>
+        </div>`
+      ).join('');
+
+      // PRs
+      const prsHtml = Object.entries(prs).filter(([,v])=>v).slice(0,12).map(([k,v]) =>
+        `<div class="pr-mini"><span class="mov">${prNomes[k]||k}</span><span class="val">${v}${k==='remo_500m'?'min':'kg'}</span></div>`
+      ).join('');
+
+      // Check-ins
+      const checkinsHtml = checkins.slice(0,8).map(c => {
+        const data = new Date(c.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+        const sen = sensacaoEmoji[c.sensacao] || '';
+        return `<div class="checkin-mini">
+          <div><div class="data">${data} · ${c.dia_semana||''}</div>
+          ${c.observacoes ? `<div class="checkin-obs">"${c.observacoes.slice(0,60)}${c.observacoes.length>60?'...':''}"</div>` : ''}
+          ${c.nova_lesao && c.descricao_lesao ? `<div class="checkin-obs" style="color:var(--laranja)">⚠️ ${c.descricao_lesao}</div>` : ''}
+          </div>
+          <div class="metricas">
+            <span class="met">${sen}</span>
+            <span class="met">RPE <b>${c.rpe||'—'}</b></span>
+            <span class="met">${c.concluido?'✓':''}</span>
+          </div>
+        </div>`;
+      }).join('') || '<div class="empty-state">Sem check-ins ainda.</div>';
+
+      document.getElementById('detalheContent').innerHTML = `
+        <div class="modal-nome">${a.nome||'—'}</div>
+        <div class="modal-email">${a.email||''} · cadastrado há ${dias_cadastro} dias</div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Perfil</div>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="label">Nível</div><div class="value">${nivelLabel[a.nivel]||a.nivel||'—'}</div></div>
+            <div class="detail-item"><div class="label">Frequência</div><div class="value">${a.frequencia||'—'}x / semana</div></div>
+            <div class="detail-item"><div class="label">Tempo treino</div><div class="value">${a.tempo_treino||'—'}</div></div>
+            <div class="detail-item"><div class="label">Disponível</div><div class="value">${a.tempo_treino_disponivel||'—'}</div></div>
+            <div class="detail-item"><div class="label">Local</div><div class="value">${a.local_treino||'—'}</div></div>
+            <div class="detail-item"><div class="label">Semanas geradas</div><div class="value">${programacoes.length}</div></div>
+            <div class="detail-item" style="grid-column:span 2"><div class="label">Objetivos</div><div class="value" style="font-size:0.82rem;font-weight:400">${(a.objetivos||[]).join(', ')||'—'}</div></div>
+            ${a.lesoes?.length ? `<div class="detail-item" style="grid-column:span 2"><div class="label">⚠️ Lesões</div><div class="value" style="color:var(--laranja);font-size:0.82rem">${a.lesoes.join(', ')}</div></div>` : ''}
+            ${a.contexto ? `<div class="detail-item" style="grid-column:span 2"><div class="label">Contexto</div><div class="value" style="font-size:0.78rem;font-weight:400;color:var(--cinza)">${a.contexto}</div></div>` : ''}
+          </div>
+        </div>
+
+        ${skillsHtml ? `<div class="detail-section"><div class="detail-section-title">Habilidades</div>${skillsHtml}</div>` : ''}
+
+        ${prsHtml ? `<div class="detail-section"><div class="detail-section-title">Recordes Pessoais</div><div class="pr-mini-grid">${prsHtml}</div></div>` : ''}
+
+        <div class="detail-section">
+          <div class="detail-section-title">Últimos Check-ins (${checkins.length} total)</div>
+          ${checkinsHtml}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
