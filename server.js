@@ -534,7 +534,11 @@ IMPORTANTE: Adapte todos os treinos ao local "${atleta.local_treino || 'box'}" e
     res.json({ programacao_id: prog.id, semana: semanaData });
   } catch (err) {
     console.error('Erro ao gerar programação:', err);
-    res.status(500).json({ erro: 'Erro ao gerar a programação. Tente novamente em alguns segundos.' });
+    res.status(500).json({
+      erro: err.message || 'Erro ao gerar a programação. Tente novamente em alguns segundos.',
+      detalhe: err.toString(),
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    });
   }
 });
 
